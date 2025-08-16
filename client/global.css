@@ -188,6 +188,18 @@
     -webkit-background-clip: text;
   }
 
+  .animate-voicePulse {
+    animation: voicePulse 1.5s ease-in-out infinite;
+  }
+
+  .animate-soundWave {
+    animation: soundWave 0.8s ease-in-out infinite;
+  }
+
+  .animate-slideUp {
+    animation: slideUp 0.6s ease-out forwards;
+  }
+
   /* Stylish Scrollbar */
   * {
     scrollbar-width: thin;
