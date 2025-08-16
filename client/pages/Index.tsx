@@ -830,10 +830,17 @@ export default function Index() {
             <div className="flex justify-between items-center h-16">
               {/* Logo Section */}
               <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <h1 className="text-2xl font-bold text-white">
-                    <span className="text-blue-300">AI</span> Assistant
-                  </h1>
+                <div className="flex items-center gap-4">
+                  <img
+                    src="https://hutechsolutions.com/wp-content/uploads/2024/08/hutech-logo-1.svg"
+                    alt="Hutech Solutions"
+                    className="h-10 w-auto"
+                  />
+                  <img
+                    src="https://hutechsolutions.com/wp-content/uploads/2024/08/cmmi-level3-logo.svg"
+                    alt="CMMI Level 3"
+                    className="h-8 w-auto"
+                  />
                 </div>
               </div>
 
@@ -860,18 +867,6 @@ export default function Index() {
 
               {/* Right Side Items */}
               <div className="flex items-center space-x-4">
-                {/* New Chat Button */}
-                <button
-                  onClick={() => {
-                    setIsConversationMode(false);
-                    setMessages([]);
-                    setRecommendations([]);
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 transform hover:scale-105 shadow-md"
-                >
-                  New Chat
-                </button>
-
                 {/* Chat Bot Button */}
                 <button
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 transform hover:scale-105 shadow-md"
@@ -882,29 +877,8 @@ export default function Index() {
                     <path d="M13 8H7"/>
                     <path d="M17 12H7"/>
                   </svg>
-                  <span className="hidden sm:inline text-sm font-medium">Active</span>
+                  <span className="hidden sm:inline text-sm font-medium">Chat</span>
                 </button>
-
-                {/* User Avatar */}
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center border-2 border-blue-300">
-                  <User size={16} className="text-white" />
-                </div>
-
-                {/* Settings */}
-                <button className="text-blue-100 hover:text-white p-1 transition-colors duration-200">
-                  <Settings size={20} />
-                </button>
-
-                {/* Mobile Menu Button */}
-                <div className="md:hidden">
-                  <button className="text-blue-100 hover:text-white p-2">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <line x1="3" y1="6" x2="21" y2="6"/>
-                      <line x1="3" y1="12" x2="21" y2="12"/>
-                      <line x1="3" y1="18" x2="21" y2="18"/>
-                    </svg>
-                  </button>
-                </div>
               </div>
             </div>
           </nav>
