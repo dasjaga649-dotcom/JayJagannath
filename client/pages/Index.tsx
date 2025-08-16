@@ -236,48 +236,217 @@ export default function Index() {
     }, 150); // Adjust speed (words per interval)
   };
 
-  // Download chat as PDF functionality
+  // Modern PDF download functionality
   const downloadChatAsPDF = () => {
-    // Create HTML content for PDF
+    const currentDate = new Date();
+    const formatDate = currentDate.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    // Create modern HTML content for PDF
     const htmlContent = `
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Chat History</title>
+          <meta charset="UTF-8">
+          <title>Hutech AI Assistant - Chat History</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 20px; background: #f9fafb; }
-            .chat-container { max-width: 800px; margin: 0 auto; }
-            .message { margin: 20px 0; display: flex; }
-            .user-message { justify-content: flex-end; }
-            .user-bubble { background: linear-gradient(to right, #3b82f6, #8b5cf6); color: white; padding: 15px; border-radius: 20px; max-width: 60%; }
-            .assistant-message { justify-content: flex-start; }
-            .assistant-bubble { background: white; border: 1px solid #e5e7eb; padding: 15px; border-radius: 20px; max-width: 80%; }
-            .timestamp { font-size: 12px; color: #6b7280; margin-top: 5px; }
-            img { max-width: 100%; height: auto; border-radius: 10px; margin: 10px 0; }
-            .related-content { margin-top: 15px; }
-            .related-item { border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px; margin: 5px 0; }
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+              font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+              line-height: 1.6;
+              color: #1f2937;
+              background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+              min-height: 100vh;
+              padding: 20px;
+            }
+            .container {
+              max-width: 900px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+              overflow: hidden;
+            }
+            .header {
+              background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+              color: white;
+              padding: 40px;
+              text-align: center;
+              position: relative;
+              overflow: hidden;
+            }
+            .header::before {
+              content: '';
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+              opacity: 0.3;
+            }
+            .header-content { position: relative; z-index: 1; }
+            .logo-section { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 20px; }
+            .logo { height: 40px; filter: brightness(0) invert(1); }
+            .company-name { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+            .subtitle { font-size: 16px; opacity: 0.9; margin-bottom: 20px; }
+            .date-info {
+              background: rgba(255, 255, 255, 0.15);
+              padding: 12px 24px;
+              border-radius: 50px;
+              display: inline-block;
+              backdrop-filter: blur(10px);
+              border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            .content { padding: 40px; }
+            .chat-stats {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+              gap: 20px;
+              margin-bottom: 40px;
+            }
+            .stat-card {
+              background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+              padding: 20px;
+              border-radius: 12px;
+              text-align: center;
+              border: 1px solid #e2e8f0;
+            }
+            .stat-number { font-size: 24px; font-weight: 700; color: #1e40af; }
+            .stat-label { font-size: 14px; color: #64748b; margin-top: 4px; }
+            .message {
+              margin: 30px 0;
+              display: flex;
+              gap: 15px;
+              align-items: flex-start;
+            }
+            .user-message { flex-direction: row-reverse; }
+            .message-avatar {
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: 600;
+              font-size: 14px;
+              flex-shrink: 0;
+            }
+            .user-avatar {
+              background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+              color: white;
+            }
+            .ai-avatar {
+              background: linear-gradient(135deg, #10b981, #059669);
+              color: white;
+            }
+            .message-bubble {
+              max-width: 70%;
+              padding: 20px;
+              border-radius: 20px;
+              position: relative;
+              word-wrap: break-word;
+            }
+            .user-bubble {
+              background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+              color: white;
+              border-bottom-right-radius: 8px;
+            }
+            .assistant-bubble {
+              background: #f8fafc;
+              border: 1px solid #e2e8f0;
+              color: #1f2937;
+              border-bottom-left-radius: 8px;
+            }
+            .message-content { margin-bottom: 8px; }
+            .timestamp {
+              font-size: 11px;
+              opacity: 0.7;
+              text-align: right;
+              margin-top: 8px;
+            }
+            .user-bubble .timestamp { color: rgba(255, 255, 255, 0.8); }
+            .assistant-bubble .timestamp { color: #64748b; }
+            .page-footer {
+              background: #f8fafc;
+              padding: 30px;
+              text-align: center;
+              border-top: 1px solid #e2e8f0;
+              color: #64748b;
+              font-size: 14px;
+            }
+            .footer-logo {
+              height: 24px;
+              opacity: 0.7;
+              margin: 0 10px;
+              vertical-align: middle;
+            }
+            @media print {
+              body { background: white; padding: 0; }
+              .container { box-shadow: none; border-radius: 0; }
+            }
           </style>
         </head>
         <body>
-          <div class="chat-container">
-            <h1>Chat History - ${new Date().toLocaleDateString()}</h1>
-            ${messages.map(msg => `
-              <div class="message ${msg.type}-message">
-                <div class="${msg.type}-bubble">
-                  <div>${msg.content}</div>
-                  ${msg.response ? `
-                    <div>${msg.response.answer}</div>
-                    ${msg.response.related_content?.map(content => `
-                      <div class="related-content">
-                        <img src="${content.image}" alt="${content.title}" />
-                        <div><strong>${content.title}</strong></div>
-                      </div>
-                    `).join('') || ''}
-                  ` : ''}
-                  <div class="timestamp">${msg.timestamp.toLocaleString()}</div>
+          <div class="container">
+            <div class="header">
+              <div class="header-content">
+                <div class="logo-section">
+                  <svg class="logo" viewBox="0 0 100 30" fill="currentColor">
+                    <rect x="0" y="10" width="20" height="10" rx="2"/>
+                    <rect x="25" y="5" width="20" height="20" rx="3"/>
+                    <rect x="50" y="8" width="20" height="14" rx="2"/>
+                    <text x="75" y="20" font-size="12" font-weight="bold">HUTECH</text>
+                  </svg>
+                </div>
+                <h1 class="company-name">Hutech Solutions</h1>
+                <p class="subtitle">AI Assistant Chat History</p>
+                <div class="date-info">Generated on ${formatDate}</div>
+              </div>
+            </div>
+
+            <div class="content">
+              <div class="chat-stats">
+                <div class="stat-card">
+                  <div class="stat-number">${messages.length}</div>
+                  <div class="stat-label">Total Messages</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number">${messages.filter(m => m.type === 'user').length}</div>
+                  <div class="stat-label">User Messages</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number">${messages.filter(m => m.type === 'assistant').length}</div>
+                  <div class="stat-label">AI Responses</div>
                 </div>
               </div>
-            `).join('')}
+
+              ${messages.map(msg => `
+                <div class="message ${msg.type}-message">
+                  <div class="message-avatar ${msg.type === 'user' ? 'user-avatar' : 'ai-avatar'}">
+                    ${msg.type === 'user' ? 'U' : 'AI'}
+                  </div>
+                  <div class="message-bubble ${msg.type}-bubble">
+                    <div class="message-content">
+                      ${msg.type === 'user' ? msg.content : (msg.response?.answer || msg.content)}
+                    </div>
+                    <div class="timestamp">${msg.timestamp.toLocaleString()}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="page-footer">
+              <p>
+                Powered by Hutech Solutions AI Assistant •
+                CMMI Level 3 Certified •
+                Generated: ${currentDate.toISOString()}
+              </p>
+            </div>
           </div>
         </body>
       </html>
@@ -287,10 +456,10 @@ export default function Index() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `chat-${new Date().toISOString().split('T')[0]}.html`;
+    link.download = `Hutech-AI-Chat-${new Date().toISOString().split('T')[0]}.html`;
     link.click();
     URL.revokeObjectURL(url);
-    showNotification('PDF downloaded successfully!', 'success');
+    showNotification('Modern chat history downloaded!', 'success');
     setShowDotMenu(false);
   };
 
