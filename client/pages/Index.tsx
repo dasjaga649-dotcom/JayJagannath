@@ -1102,35 +1102,43 @@ export default function Index() {
           {messages.map((message, index) => (
             <div
               key={message.id}
-              className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-center'} animate-fadeInUp`}
+              className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-fadeInUp mb-4`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className={`${message.type === 'user' ? `max-w-md ${darkMode ? 'bg-gray-800 border-gray-600 text-gray-100' : 'bg-white border-gray-200'} text-sm` : `max-w-xl ${darkMode ? 'bg-gray-800 border-gray-600 text-gray-100' : 'bg-white border-gray-200'} text-sm`} rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-[1.02]`}>
+              <div className={`${message.type === 'user' ? 'max-w-xs ml-auto' : 'max-w-4xl mr-auto'} ${message.type === 'user' ? 'bg-blue-600 text-white rounded-2xl rounded-br-md p-4' : 'bg-transparent text-gray-900 p-2'}`}>
                 {message.type === 'user' ? (
-                  <p>{message.content}</p>
+                  <p className="text-sm">{message.content}</p>
                 ) : (
                   <div>
-                    <div className="prose max-w-none">
+                    <div className="max-w-none">
                       {(() => {
                         // Show typing animation if this message is currently being typed
                         if (typingMessageId === message.id && displayedText) {
-                          const formatted = formatAnswerText(displayedText, darkMode);
                           return (
-                            <div>
-                              {formatted.formattedText}
+                            <div className="prose-sm text-gray-900">
+                              <div className="whitespace-pre-wrap">{displayedText}</div>
                               <span className="animate-pulse text-blue-500">|</span>
                             </div>
                           );
                         }
 
                         // Show complete message
-                        const formatted = formatAnswerText(message.response?.answer || '', darkMode);
+                        const answer = message.response?.answer || '';
                         return (
                           <div>
-                            {formatted.formattedText}
-                            {/* Show images only after typing is complete or if not currently typing */}
-                            {(showImages[message.id] || (typingMessageId !== message.id && typingMessageId !== null) || typingMessageId === null) && (
-                              <ImageCarousel images={formatted.images} />
+                            <div className="prose-sm text-gray-900 whitespace-pre-wrap leading-relaxed">
+                              {answer}
+                            </div>
+                            {/* Show Hutech logo when no images are present */}
+                            {(!message.response?.related_content || message.response.related_content.length === 0) && (
+                              <div className="mt-4 flex items-center gap-2 opacity-70">
+                                <img
+                                  src="https://hutechsolutions.com/wp-content/uploads/2024/08/hutech-logo-1.svg"
+                                  alt="Hutech Solutions"
+                                  className="h-6 w-auto"
+                                />
+                                <span className="text-xs text-gray-500">Powered by Hutech AI</span>
+                              </div>
                             )}
                           </div>
                         );
