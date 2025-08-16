@@ -34,7 +34,7 @@ const predefinedQuestions = [
   {
     category: "Offices",
     question: "Where are our offices?",
-    icon: "🏢"
+    icon: "��"
   },
   {
     category: "Services",
@@ -1179,10 +1179,17 @@ export default function Index() {
           <div className="flex justify-between items-center h-16">
             {/* Logo Section */}
             <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <h1 className="text-2xl font-bold text-white">
-                  <span className="text-blue-300">AI</span> Assistant
-                </h1>
+              <div className="flex items-center gap-4">
+                <img
+                  src="https://hutechsolutions.com/wp-content/uploads/2024/08/hutech-logo-1.svg"
+                  alt="Hutech Solutions"
+                  className="h-10 w-auto"
+                />
+                <img
+                  src="https://hutechsolutions.com/wp-content/uploads/2024/08/cmmi-level3-logo.svg"
+                  alt="CMMI Level 3"
+                  className="h-8 w-auto"
+                />
               </div>
             </div>
 
