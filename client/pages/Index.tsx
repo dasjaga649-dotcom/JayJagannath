@@ -823,7 +823,7 @@ export default function Index() {
 
   if (isConversationMode) {
     return (
-      <div className={`h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} flex flex-col`}>
+      <div className={`h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} flex flex-col overflow-hidden`}>
         {/* Professional Navigation Bar */}
         <header className={`${darkMode ? 'bg-gray-900' : 'bg-gradient-to-r from-blue-800 to-blue-900'} shadow-lg flex-shrink-0`}>
           <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -885,7 +885,50 @@ export default function Index() {
         </header>
 
         {/* Chat Messages - Scrollable Area */}
-        <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+        <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-6 relative">
+          {/* Modern Voice Animation Overlay */}
+          {isRecording && (
+            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-3xl p-8 shadow-2xl">
+                <div className="flex flex-col items-center gap-6">
+                  <div className="relative">
+                    {/* Animated mic icon */}
+                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center animate-pulse">
+                      <Mic size={40} className="text-blue-600" />
+                    </div>
+                    {/* Ripple effect */}
+                    <div className="absolute inset-0 rounded-full border-4 border-white/30 animate-ping"></div>
+                    <div className="absolute -inset-2 rounded-full border-2 border-white/20 animate-ping" style={{animationDelay: '0.5s'}}></div>
+                    <div className="absolute -inset-4 rounded-full border border-white/10 animate-ping" style={{animationDelay: '1s'}}></div>
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-white text-xl font-semibold mb-2">Listening...</h3>
+                    <p className="text-white/80 text-sm">Speak clearly and I'll understand</p>
+                  </div>
+                  {/* Sound waves animation */}
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-1 bg-white/60 rounded-full animate-pulse"
+                        style={{
+                          height: `${Math.random() * 30 + 10}px`,
+                          animationDelay: `${i * 0.1}s`,
+                          animationDuration: '0.8s'
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setIsRecording(false)}
+                    className="mt-4 px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full transition-all duration-200 backdrop-blur-sm border border-white/20"
+                  >
+                    Stop Listening
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           {messages.map((message, index) => (
             <div
               key={message.id}
@@ -1203,7 +1246,7 @@ export default function Index() {
   }
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' : 'bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30'}`}>
+    <div className={`h-screen overflow-hidden ${darkMode ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' : 'bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30'}`}>
       {/* Professional Navigation Bar */}
       <header className={`${darkMode ? 'bg-gray-900' : 'bg-gradient-to-r from-blue-800 to-blue-900'} shadow-lg`}>
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1266,7 +1309,7 @@ export default function Index() {
       </header>
 
       {/* Main Content */}
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] px-6">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 overflow-hidden">
         {/* Greeting Section */}
         <div className="text-center mb-12">
           <h2 className={`text-4xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} mb-4`}>
