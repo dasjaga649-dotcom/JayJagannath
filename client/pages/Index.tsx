@@ -572,6 +572,7 @@ export default function Index() {
               recognition.stop();
               if (finalTranscript.trim()) {
                 handleQuestionSubmit(finalTranscript);
+                setInputValue(""); // Clear input after search
               }
             }, 4000);
 
