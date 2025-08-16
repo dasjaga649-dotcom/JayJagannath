@@ -1857,7 +1857,7 @@ export default function Index() {
           )}
 
           <div
-            className={`flex items-center gap-3 ${darkMode ? "bg-gray-700" : "bg-gray-100"} rounded-full p-3 transition-all duration-300 ${isLoading ? "bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-2 border-blue-300 shadow-lg scale-105" : `${darkMode ? "hover:bg-gray-600" : "hover:bg-gray-200"} hover:shadow-md`}`}
+            className={`flex items-center gap-3 ${darkMode ? "bg-gray-700" : "bg-gray-50"} rounded-full p-3 transition-all duration-300 border ${darkMode ? "border-gray-600" : "border-gray-200"} shadow-sm ${isLoading ? "bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-blue-300 shadow-lg scale-105" : `${darkMode ? "hover:bg-gray-600 hover:border-gray-500" : "hover:bg-white hover:border-gray-300"} hover:shadow-md`}`}
           >
             {/* Left side - Voice only */}
             <div className="flex items-center gap-2">
