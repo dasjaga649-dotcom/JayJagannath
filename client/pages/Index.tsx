@@ -34,7 +34,7 @@ const predefinedQuestions = [
   {
     category: "Offices",
     question: "Where are our offices?",
-    icon: "��"
+    icon: "🏢"
   },
   {
     category: "Services",
@@ -1229,26 +1229,6 @@ export default function Index() {
                 <span className="hidden sm:inline text-sm font-medium">Chat</span>
               </button>
 
-              {/* User Avatar */}
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center border-2 border-blue-300">
-                <User size={16} className="text-white" />
-              </div>
-
-              {/* Settings */}
-              <button className="text-blue-100 hover:text-white p-1 transition-colors duration-200">
-                <Settings size={20} />
-              </button>
-
-              {/* Mobile Menu Button */}
-              <div className="md:hidden">
-                <button className="text-blue-100 hover:text-white p-2">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="3" y1="6" x2="21" y2="6"/>
-                    <line x1="3" y1="12" x2="21" y2="12"/>
-                    <line x1="3" y1="18" x2="21" y2="18"/>
-                  </svg>
-                </button>
-              </div>
             </div>
           </div>
         </nav>
