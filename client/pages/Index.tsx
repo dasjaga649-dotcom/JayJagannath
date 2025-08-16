@@ -1,5 +1,17 @@
 import { useState, useEffect, useRef } from "react";
-import { Upload, Mic, Image, Send, User, Settings, ChevronLeft, ChevronRight, Download, Trash2, FileText } from "lucide-react";
+import {
+  Upload,
+  Mic,
+  Image,
+  Send,
+  User,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Trash2,
+  FileText,
+} from "lucide-react";
 
 // Type definitions for the backend response
 interface RelatedContent {
@@ -19,53 +31,53 @@ interface BackendResponse {
 
 interface Message {
   id: string;
-  type: 'user' | 'assistant';
+  type: "user" | "assistant";
   content: string;
   timestamp: Date;
-  response?: BackendResponse['response'];
+  response?: BackendResponse["response"];
 }
 
 const predefinedQuestions = [
   {
     category: "Founder/CEO",
     question: "Who is the founder/who is the CEO?",
-    icon: "👤"
+    icon: "👤",
   },
   {
     category: "Offices",
     question: "Where are our offices?",
-    icon: "🏢"
+    icon: "🏢",
   },
   {
     category: "Services",
     question: "What services do we provide?",
-    icon: "⚙️"
+    icon: "⚙️",
   },
   {
     category: "Industries",
     question: "What industries do we serve?",
-    icon: "🏭"
+    icon: "🏭",
   },
   {
     category: "Stats",
     question: "What are some impressive stats about Hutech?",
-    icon: "📊"
+    icon: "📊",
   },
   {
     category: "Certifications",
     question: "What certifications do we have?",
-    icon: "🏆"
+    icon: "🏆",
   },
   {
     category: "Tech Stack",
     question: "What is our tech stack?",
-    icon: "💻"
+    icon: "💻",
   },
   {
     category: "Contact",
     question: "Give me your contact details.",
-    icon: "📞"
-  }
+    icon: "📞",
+  },
 ];
 
 export default function Index() {
@@ -82,13 +94,18 @@ export default function Index() {
   const [isTyping, setIsTyping] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [voiceRecognition, setVoiceRecognition] = useState<any>(null);
-  const [recordingTimer, setRecordingTimer] = useState<NodeJS.Timeout | null>(null);
+  const [recordingTimer, setRecordingTimer] = useState<NodeJS.Timeout | null>(
+    null,
+  );
   const [showDotMenu, setShowDotMenu] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
   const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
-  const [displayedText, setDisplayedText] = useState<string>('');
-  const [showImages, setShowImages] = useState<{[key: string]: boolean}>({});
+  const [displayedText, setDisplayedText] = useState<string>("");
+  const [showImages, setShowImages] = useState<{ [key: string]: boolean }>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -97,16 +114,16 @@ export default function Index() {
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
     if (messagesEndRef.current && isConversationMode) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isConversationMode]);
 
   const handleQuestionSubmit = async (question: string) => {
     const userMessage: Message = {
       id: Date.now().toString(),
-      type: 'user',
+      type: "user",
       content: question,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     setMessages([userMessage]);
@@ -115,12 +132,12 @@ export default function Index() {
 
     try {
       // Make API call to backend
-      const response = await fetch('http://localhost:3001/query', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3001/query", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ query: question })
+        body: JSON.stringify({ query: question }),
       });
 
       if (!response.ok) {
@@ -131,14 +148,14 @@ export default function Index() {
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        type: 'assistant',
+        type: "assistant",
         content: "",
         timestamp: new Date(),
-        response: data.response
+        response: data.response,
       };
 
       // Add the message immediately but start typing animation
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
       setRecommendations(data.response.recommendations || []);
 
       // Start typing animation for the response
@@ -147,23 +164,24 @@ export default function Index() {
         speakWithElevenLabs(data.response.answer);
       });
     } catch (error) {
-      console.error('Error calling backend API:', error);
+      console.error("Error calling backend API:", error);
 
       // Show error message to user
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        type: 'assistant',
+        type: "assistant",
         content: "",
         timestamp: new Date(),
         response: {
-          answer: "Sorry, I'm having trouble connecting to the backend service. Please check if the backend is running on http://localhost:3001/query and try again.",
+          answer:
+            "Sorry, I'm having trouble connecting to the backend service. Please check if the backend is running on http://localhost:3001/query and try again.",
           file_links: [],
           recommendations: [],
-          related_content: []
-        }
+          related_content: [],
+        },
       };
 
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
       setRecommendations([]);
     } finally {
       setIsLoading(false);
@@ -183,17 +201,17 @@ export default function Index() {
   };
 
   // Notification system
-  const showNotification = (message: string, type: 'success' | 'error') => {
-    setNotification({message, type});
+  const showNotification = (message: string, type: "success" | "error") => {
+    setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    setUploadedFiles(prev => [...prev, ...files]);
-    showNotification('File uploaded successfully!', 'success');
+    setUploadedFiles((prev) => [...prev, ...files]);
+    showNotification("File uploaded successfully!", "success");
     setShowDotMenu(false);
-    console.log('Uploaded files:', files);
+    console.log("Uploaded files:", files);
   };
 
   // Image upload handler
@@ -203,10 +221,10 @@ export default function Index() {
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    setUploadedFiles(prev => [...prev, ...files]);
-    showNotification('Image uploaded successfully!', 'success');
+    setUploadedFiles((prev) => [...prev, ...files]);
+    showNotification("Image uploaded successfully!", "success");
     setShowDotMenu(false);
-    console.log('Uploaded images:', files);
+    console.log("Uploaded images:", files);
   };
 
   // Typing animation for bot responses (word by word)
@@ -215,13 +233,16 @@ export default function Index() {
     setDisplayedText("");
 
     // Split text into words
-    const words = text.split(' ');
+    const words = text.split(" ");
     let currentWordIndex = 0;
 
     const typeInterval = setInterval(() => {
       if (currentWordIndex < words.length) {
-        setDisplayedText(prev => {
-          const newText = currentWordIndex === 0 ? words[0] : prev + ' ' + words[currentWordIndex];
+        setDisplayedText((prev) => {
+          const newText =
+            currentWordIndex === 0
+              ? words[0]
+              : prev + " " + words[currentWordIndex];
           return newText;
         });
         currentWordIndex++;
@@ -230,7 +251,7 @@ export default function Index() {
         setTypingMessageId(null);
         setDisplayedText("");
         // Show images for this message
-        setShowImages(prev => ({...prev, [messageId]: true}));
+        setShowImages((prev) => ({ ...prev, [messageId]: true }));
         if (callback) callback();
       }
     }, 150); // Adjust speed (words per interval)
@@ -239,11 +260,11 @@ export default function Index() {
   // Modern PDF download functionality
   const downloadChatAsPDF = () => {
     const currentDate = new Date();
-    const formatDate = currentDate.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    const formatDate = currentDate.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
 
     // Create modern HTML content for PDF
@@ -416,28 +437,32 @@ export default function Index() {
                   <div class="stat-label">Total Messages</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-number">${messages.filter(m => m.type === 'user').length}</div>
+                  <div class="stat-number">${messages.filter((m) => m.type === "user").length}</div>
                   <div class="stat-label">User Messages</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-number">${messages.filter(m => m.type === 'assistant').length}</div>
+                  <div class="stat-number">${messages.filter((m) => m.type === "assistant").length}</div>
                   <div class="stat-label">AI Responses</div>
                 </div>
               </div>
 
-              ${messages.map(msg => `
+              ${messages
+                .map(
+                  (msg) => `
                 <div class="message ${msg.type}-message">
-                  <div class="message-avatar ${msg.type === 'user' ? 'user-avatar' : 'ai-avatar'}">
-                    ${msg.type === 'user' ? 'U' : 'AI'}
+                  <div class="message-avatar ${msg.type === "user" ? "user-avatar" : "ai-avatar"}">
+                    ${msg.type === "user" ? "U" : "AI"}
                   </div>
                   <div class="message-bubble ${msg.type}-bubble">
                     <div class="message-content">
-                      ${msg.type === 'user' ? msg.content : (msg.response?.answer || msg.content)}
+                      ${msg.type === "user" ? msg.content : msg.response?.answer || msg.content}
                     </div>
                     <div class="timestamp">${msg.timestamp.toLocaleString()}</div>
                   </div>
                 </div>
-              `).join('')}
+              `,
+                )
+                .join("")}
             </div>
 
             <div class="page-footer">
@@ -452,41 +477,41 @@ export default function Index() {
       </html>
     `;
 
-    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const blob = new Blob([htmlContent], { type: "text/html" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = `Hutech-AI-Chat-${new Date().toISOString().split('T')[0]}.html`;
+    link.download = `Hutech-AI-Chat-${new Date().toISOString().split("T")[0]}.html`;
     link.click();
     URL.revokeObjectURL(url);
-    showNotification('Modern chat history downloaded!', 'success');
+    showNotification("Modern chat history downloaded!", "success");
     setShowDotMenu(false);
   };
 
   // Clear chat with confirmation (keeps messages in localStorage)
   const clearChatHistory = () => {
     // Save current messages to history before clearing
-    setChatHistory(prev => [...prev, ...messages]);
+    setChatHistory((prev) => [...prev, ...messages]);
     setMessages([]);
     setRecommendations([]);
     setShowClearConfirm(false);
     setShowDotMenu(false);
-    showNotification('History cleared successfully!', 'error');
+    showNotification("History cleared successfully!", "error");
     // Keep messages in localStorage, just clear current session
-    localStorage.setItem('allChatMessages', JSON.stringify([]));
+    localStorage.setItem("allChatMessages", JSON.stringify([]));
   };
 
   // Load all messages from localStorage on component mount
   useEffect(() => {
-    const savedMessages = localStorage.getItem('allChatMessages');
+    const savedMessages = localStorage.getItem("allChatMessages");
     if (savedMessages) {
       const allMessages = JSON.parse(savedMessages);
       setMessages(allMessages);
 
       // Initialize showImages for all existing messages (they should show images immediately)
-      const imageState: {[key: string]: boolean} = {};
+      const imageState: { [key: string]: boolean } = {};
       allMessages.forEach((msg: Message) => {
-        if (msg.type === 'assistant') {
+        if (msg.type === "assistant") {
           imageState[msg.id] = true;
         }
       });
@@ -497,16 +522,16 @@ export default function Index() {
   // Save all messages to localStorage whenever messages change
   useEffect(() => {
     if (messages.length >= 0) {
-      localStorage.setItem('allChatMessages', JSON.stringify(messages));
+      localStorage.setItem("allChatMessages", JSON.stringify(messages));
     }
   }, [messages]);
 
   // Apply dark mode to document
   useEffect(() => {
     if (darkMode) {
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
   }, [darkMode]);
 
@@ -515,15 +540,15 @@ export default function Index() {
     const handleClickOutside = (event: MouseEvent) => {
       if (showDotMenu) {
         const target = event.target as HTMLElement;
-        if (!target.closest('.dot-menu-container')) {
+        if (!target.closest(".dot-menu-container")) {
           setShowDotMenu(false);
         }
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showDotMenu]);
 
@@ -542,16 +567,21 @@ export default function Index() {
       setIsRecording(true);
 
       // Initialize speech recognition
-      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+      if (
+        "webkitSpeechRecognition" in window ||
+        "SpeechRecognition" in window
+      ) {
+        const SpeechRecognition =
+          (window as any).webkitSpeechRecognition ||
+          (window as any).SpeechRecognition;
         const recognition = new SpeechRecognition();
 
         recognition.continuous = true;
         recognition.interimResults = true;
-        recognition.lang = 'en-US';
+        recognition.lang = "en-US";
 
         recognition.onresult = (event: any) => {
-          let finalTranscript = '';
+          let finalTranscript = "";
           for (let i = event.resultIndex; i < event.results.length; i++) {
             if (event.results[i].isFinal) {
               finalTranscript += event.results[i][0].transcript;
@@ -581,14 +611,14 @@ export default function Index() {
         };
 
         recognition.onerror = (event: any) => {
-          console.error('Speech recognition error:', event.error);
+          console.error("Speech recognition error:", event.error);
           setIsRecording(false);
         };
 
         recognition.start();
         setVoiceRecognition(recognition);
       } else {
-        alert('Speech recognition not supported in this browser');
+        alert("Speech recognition not supported in this browser");
         setIsRecording(false);
       }
     }
@@ -601,22 +631,25 @@ export default function Index() {
     const VOICE_ID = "your_voice_id_here";
 
     try {
-      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'audio/mpeg',
-          'Content-Type': 'application/json',
-          'xi-api-key': ELEVENLABS_API_KEY
+      const response = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "audio/mpeg",
+            "Content-Type": "application/json",
+            "xi-api-key": ELEVENLABS_API_KEY,
+          },
+          body: JSON.stringify({
+            text: text,
+            model_id: "eleven_monolingual_v1",
+            voice_settings: {
+              stability: 0.5,
+              similarity_boost: 0.5,
+            },
+          }),
         },
-        body: JSON.stringify({
-          text: text,
-          model_id: "eleven_monolingual_v1",
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.5
-          }
-        })
-      });
+      );
 
       if (response.ok) {
         const audioBlob = await response.blob();
@@ -625,7 +658,7 @@ export default function Index() {
         audio.play();
       }
     } catch (error) {
-      console.error('ElevenLabs TTS error:', error);
+      console.error("ElevenLabs TTS error:", error);
     }
   };
 
@@ -642,10 +675,12 @@ export default function Index() {
 
     // Extract markdown images and collect URLs
     const markdownImageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
-    const markdownImages = Array.from(processedText.matchAll(markdownImageRegex));
-    markdownImages.forEach(match => {
+    const markdownImages = Array.from(
+      processedText.matchAll(markdownImageRegex),
+    );
+    markdownImages.forEach((match) => {
       images.push(match[2]); // URL from markdown
-      processedText = processedText.replace(match[0], ''); // Remove markdown syntax
+      processedText = processedText.replace(match[0], ""); // Remove markdown syntax
     });
 
     // Extract regular image URLs
@@ -653,81 +688,68 @@ export default function Index() {
     images.push(...regularImageUrls);
 
     // Fix malformed HTML tags
-    processedText = processedText.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+    processedText = processedText.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
 
     // Fix malformed list items like <li><li> to proper <li>
-    processedText = processedText.replace(/<li><li>/g, '<li>');
-    processedText = processedText.replace(/<\/li><\/li>/g, '</li>');
+    processedText = processedText.replace(/<li><li>/g, "<li>");
+    processedText = processedText.replace(/<\/li><\/li>/g, "</li>");
 
     // Handle HTML lists first
     let formattedContent: JSX.Element[] = [];
 
     // Check if text contains HTML list tags
-    if (processedText.includes('<ul>') || processedText.includes('<ol>') || processedText.includes('<li>')) {
+    if (
+      processedText.includes("<ul>") ||
+      processedText.includes("<ol>") ||
+      processedText.includes("<li>")
+    ) {
       // Split by HTML list blocks
       const parts = processedText.split(/(<\/?(?:ul|ol|li)[^>]*>)/gi);
       let currentList: JSX.Element[] = [];
       let isInList = false;
-      let listType = '';
+      let listType = "";
       let listIndex = 0;
 
       parts.forEach((part, index) => {
-        if (part.toLowerCase().includes('<ul')) {
+        if (part.toLowerCase().includes("<ul")) {
           isInList = true;
-          listType = 'ul';
-        } else if (part.toLowerCase().includes('<ol')) {
+          listType = "ul";
+        } else if (part.toLowerCase().includes("<ol")) {
           isInList = true;
-          listType = 'ol';
-        } else if (part.toLowerCase().includes('</ul>') || part.toLowerCase().includes('</ol>')) {
+          listType = "ol";
+        } else if (
+          part.toLowerCase().includes("</ul>") ||
+          part.toLowerCase().includes("</ol>")
+        ) {
           if (currentList.length > 0) {
             formattedContent.push(
               <div key={`list-${listIndex++}`} className="mb-4">
-                {listType === 'ul' ? (
-                  <ul className="list-none space-y-2">
-                    {currentList}
-                  </ul>
+                {listType === "ul" ? (
+                  <ul className="list-none space-y-2">{currentList}</ul>
                 ) : (
-                  <ol className="list-none space-y-2">
-                    {currentList}
-                  </ol>
+                  <ol className="list-none space-y-2">{currentList}</ol>
                 )}
-              </div>
+              </div>,
             );
             currentList = [];
           }
           isInList = false;
-          listType = '';
-        } else if (part.toLowerCase().includes('<li>')) {
+          listType = "";
+        } else if (part.toLowerCase().includes("<li>")) {
           // Skip the opening li tag
-        } else if (part.toLowerCase().includes('</li>')) {
+        } else if (part.toLowerCase().includes("</li>")) {
           // Skip the closing li tag
         } else if (isInList && part.trim()) {
           // Process list item content
-          const processedLine = part.split(/(\*\*[^*]+\*\*)/).map((segment, segIndex) => {
-            if (segment.startsWith('**') && segment.endsWith('**')) {
-              return (
-                <strong key={segIndex} className={`font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                  {segment.slice(2, -2)}
-                </strong>
-              );
-            }
-            return segment;
-          });
-
-          currentList.push(
-            <li key={`item-${index}`} className={`flex items-start ${darkMode ? 'text-gray-100' : 'text-gray-700'}`}>
-              <span className="text-blue-600 mr-2 mt-1 flex-shrink-0">•</span>
-              <span>{processedLine}</span>
-            </li>
-          );
-        } else if (!isInList && part.trim()) {
-          // Regular text outside of lists
-          const lines = part.split(/\\n|\n/).filter(line => line.trim());
-          lines.forEach((line, lineIndex) => {
-            const processedLine = line.split(/(\*\*[^*]+\*\*)/).map((segment, segIndex) => {
-              if (segment.startsWith('**') && segment.endsWith('**')) {
+          const processedLine = part
+            .split(/(\*\*[^*]+\*\*)/)
+            .map((segment, segIndex) => {
+              if (segment.startsWith("**") && segment.endsWith("**")) {
                 return (
-                  <strong key={segIndex} className={`font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <strong
+                    key={segIndex}
+                    className={`font-bold ${darkMode ? "text-white" : "text-gray-900"}`}
+                  >
                     {segment.slice(2, -2)}
                   </strong>
                 );
@@ -735,26 +757,96 @@ export default function Index() {
               return segment;
             });
 
+          currentList.push(
+            <li
+              key={`item-${index}`}
+              className={`flex items-start ${darkMode ? "text-gray-100" : "text-gray-700"}`}
+            >
+              <span className="text-blue-600 mr-2 mt-1 flex-shrink-0">•</span>
+              <span>{processedLine}</span>
+            </li>,
+          );
+        } else if (!isInList && part.trim()) {
+          // Regular text outside of lists
+          const lines = part.split(/\\n|\n/).filter((line) => line.trim());
+          lines.forEach((line, lineIndex) => {
+            const processedLine = line
+              .split(/(\*\*[^*]+\*\*)/)
+              .map((segment, segIndex) => {
+                if (segment.startsWith("**") && segment.endsWith("**")) {
+                  return (
+                    <strong
+                      key={segIndex}
+                      className={`font-bold ${darkMode ? "text-white" : "text-gray-900"}`}
+                    >
+                      {segment.slice(2, -2)}
+                    </strong>
+                  );
+                }
+                return segment;
+              });
+
             formattedContent.push(
-              <div key={`text-${index}-${lineIndex}`} className={`mb-2 ${darkMode ? 'text-gray-100' : 'text-gray-700'}`}>
+              <div
+                key={`text-${index}-${lineIndex}`}
+                className={`mb-2 ${darkMode ? "text-gray-100" : "text-gray-700"}`}
+              >
                 {processedLine}
-              </div>
+              </div>,
             );
           });
         }
       });
     } else {
       // No HTML lists, process as before
-      const lines = processedText.split(/\\n|\n/).filter(line => line.trim());
+      const lines = processedText.split(/\\n|\n/).filter((line) => line.trim());
 
       lines.forEach((line, index) => {
         // Handle list items
-        if (line.trim().startsWith('•') || line.trim().startsWith('-') || line.trim().match(/^\d+\./)) {
-          const listContent = line.replace(/^[•\-\d\.]\s*/, '');
-          const processedLine = listContent.split(/(\*\*[^*]+\*\*)/).map((segment, segIndex) => {
-            if (segment.startsWith('**') && segment.endsWith('**')) {
+        if (
+          line.trim().startsWith("•") ||
+          line.trim().startsWith("-") ||
+          line.trim().match(/^\d+\./)
+        ) {
+          const listContent = line.replace(/^[•\-\d\.]\s*/, "");
+          const processedLine = listContent
+            .split(/(\*\*[^*]+\*\*)/)
+            .map((segment, segIndex) => {
+              if (segment.startsWith("**") && segment.endsWith("**")) {
+                return (
+                  <strong
+                    key={segIndex}
+                    className={`font-bold ${darkMode ? "text-white" : "text-gray-900"}`}
+                  >
+                    {segment.slice(2, -2)}
+                  </strong>
+                );
+              }
+              return segment;
+            });
+
+          formattedContent.push(
+            <div
+              key={index}
+              className={`mb-2 ${darkMode ? "text-gray-100" : "text-gray-700"} ml-4 flex items-start`}
+            >
+              <span className="text-blue-600 mr-2 mt-1">•</span>
+              <span>{processedLine}</span>
+            </div>,
+          );
+          return;
+        }
+
+        // Handle bold text wrapped in **
+        const processedLine = line
+          .split(/(\*\*[^*]+\*\*)/)
+          .map((segment, segIndex) => {
+            if (segment.startsWith("**") && segment.endsWith("**")) {
               return (
-                <strong key={segIndex} className={`font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                <strong
+                  key={segIndex}
+                  className={`font-bold ${darkMode ? "text-white" : "text-gray-900"}`}
+                >
                   {segment.slice(2, -2)}
                 </strong>
               );
@@ -762,43 +854,29 @@ export default function Index() {
             return segment;
           });
 
-          formattedContent.push(
-            <div key={index} className={`mb-2 ${darkMode ? 'text-gray-100' : 'text-gray-700'} ml-4 flex items-start`}>
-              <span className="text-blue-600 mr-2 mt-1">•</span>
-              <span>{processedLine}</span>
-            </div>
-          );
-          return;
-        }
-
-        // Handle bold text wrapped in **
-        const processedLine = line.split(/(\*\*[^*]+\*\*)/).map((segment, segIndex) => {
-          if (segment.startsWith('**') && segment.endsWith('**')) {
-            return (
-              <strong key={segIndex} className={`font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                {segment.slice(2, -2)}
-              </strong>
-            );
-          }
-          return segment;
-        });
-
         formattedContent.push(
-          <div key={index} className={`mb-2 ${darkMode ? 'text-gray-100' : 'text-gray-700'}`}>
+          <div
+            key={index}
+            className={`mb-2 ${darkMode ? "text-gray-100" : "text-gray-700"}`}
+          >
             {processedLine}
-          </div>
+          </div>,
         );
       });
     }
 
     return {
       formattedText: formattedContent,
-      images: images
+      images: images,
     };
   };
 
   // Related Content Carousel Component
-  const RelatedContentCarousel = ({ content }: { content: RelatedContent[] }) => {
+  const RelatedContentCarousel = ({
+    content,
+  }: {
+    content: RelatedContent[];
+  }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
 
     if (content.length === 0) return null;
@@ -809,15 +887,20 @@ export default function Index() {
             href={content[0].url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`block ${darkMode ? 'border-gray-600' : 'border-gray-200'} border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:scale-[1.03]`}
+            className={`block ${darkMode ? "border-gray-600" : "border-gray-200"} border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:scale-[1.03]`}
           >
             <img
-              src={content[0].image || "https://hutechsolutions.com/wp-content/uploads/2024/08/hutech-logo-1.svg"}
+              src={
+                content[0].image ||
+                "https://hutechsolutions.com/wp-content/uploads/2024/08/hutech-logo-1.svg"
+              }
               alt={content[0].title}
               className="w-full h-48 object-cover bg-gray-100 p-4"
             />
             <div className="p-4 bg-transparent">
-              <h5 className={`font-medium text-sm hover:text-blue-600 cursor-pointer ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+              <h5
+                className={`font-medium text-sm hover:text-blue-600 cursor-pointer ${darkMode ? "text-white" : "text-gray-800"}`}
+              >
                 {content[0].title}
               </h5>
             </div>
@@ -842,11 +925,14 @@ export default function Index() {
           href={currentContent.url}
           target="_blank"
           rel="noopener noreferrer"
-          className={`block ${darkMode ? 'border-gray-600' : 'border-gray-200'} border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300`}
+          className={`block ${darkMode ? "border-gray-600" : "border-gray-200"} border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300`}
         >
           <div className="relative">
             <img
-              src={currentContent.image || "https://hutechsolutions.com/wp-content/uploads/2024/08/hutech-logo-1.svg"}
+              src={
+                currentContent.image ||
+                "https://hutechsolutions.com/wp-content/uploads/2024/08/hutech-logo-1.svg"
+              }
               alt={currentContent.title}
               className="w-full h-48 object-cover bg-gray-100 p-4"
             />
@@ -879,7 +965,9 @@ export default function Index() {
           </div>
 
           <div className="p-4 bg-transparent">
-            <h5 className={`font-medium text-sm hover:text-blue-600 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+            <h5
+              className={`font-medium text-sm hover:text-blue-600 ${darkMode ? "text-white" : "text-gray-800"}`}
+            >
               {currentContent.title}
             </h5>
           </div>
@@ -950,7 +1038,9 @@ export default function Index() {
               key={index}
               onClick={() => setCurrentIndex(index)}
               className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                index === currentIndex ? 'border-blue-500 scale-110' : 'border-gray-300 hover:border-gray-400'
+                index === currentIndex
+                  ? "border-blue-500 scale-110"
+                  : "border-gray-300 hover:border-gray-400"
               }`}
             >
               <img
@@ -966,25 +1056,27 @@ export default function Index() {
   };
 
   const formatAnswer = (answer: string) => {
-    return answer.split('\n').map((line, index) => {
-      if (line.startsWith('• **') && line.includes(':**')) {
-        const parts = line.split(':**');
+    return answer.split("\n").map((line, index) => {
+      if (line.startsWith("• **") && line.includes(":**")) {
+        const parts = line.split(":**");
         return (
           <div key={index} className="mb-2">
-            <span className="font-semibold text-blue-600">{parts[0].replace('• **', '')}:</span>
+            <span className="font-semibold text-blue-600">
+              {parts[0].replace("• **", "")}:
+            </span>
             <span className="ml-2">{parts[1]}</span>
           </div>
         );
-      } else if (line.startsWith('**') && line.endsWith(':**')) {
+      } else if (line.startsWith("**") && line.endsWith(":**")) {
         return (
           <div key={index} className="font-bold text-gray-800 mt-4 mb-2">
-            {line.replace(/\*\*/g, '')}
+            {line.replace(/\*\*/g, "")}
           </div>
         );
-      } else if (line.startsWith('• ')) {
+      } else if (line.startsWith("• ")) {
         return (
           <div key={index} className="ml-4 mb-1 text-gray-700">
-            {line.replace('• ', '• ')}
+            {line.replace("• ", "• ")}
           </div>
         );
       } else if (line.trim()) {
@@ -1000,7 +1092,9 @@ export default function Index() {
 
   if (isConversationMode) {
     return (
-      <div className={`h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} flex flex-col overflow-hidden`}>
+      <div
+        className={`h-screen ${darkMode ? "bg-gray-900" : "bg-gray-50"} flex flex-col overflow-hidden`}
+      >
         {/* Professional Navigation Bar */}
         <header className="bg-white shadow-lg flex-shrink-0 border-b border-gray-200">
           <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1024,19 +1118,34 @@ export default function Index() {
               {/* Navigation Items */}
               <div className="hidden md:block">
                 <div className="ml-10 flex items-baseline space-x-8">
-                  <a href="#" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                  <a
+                    href="#"
+                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                  >
                     Home
                   </a>
-                  <a href="#" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                  <a
+                    href="#"
+                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                  >
                     Features
                   </a>
-                  <a href="#" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                  <a
+                    href="#"
+                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                  >
                     Services
                   </a>
-                  <a href="#" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                  <a
+                    href="#"
+                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                  >
                     About
                   </a>
-                  <a href="#" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                  <a
+                    href="#"
+                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                  >
                     Contact
                   </a>
                 </div>
@@ -1050,14 +1159,24 @@ export default function Index() {
                   title="Chat Assistant Active"
                 >
                   <div className="relative">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="relative z-10">
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                      <path d="M13 8H7"/>
-                      <path d="M17 12H7"/>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="relative z-10"
+                    >
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                      <path d="M13 8H7" />
+                      <path d="M17 12H7" />
                     </svg>
                     <div className="absolute inset-0 bg-white/30 rounded-full animate-ping opacity-75"></div>
                   </div>
-                  <span className="hidden sm:inline text-sm font-semibold tracking-wide">Chat</span>
+                  <span className="hidden sm:inline text-sm font-semibold tracking-wide">
+                    Chat
+                  </span>
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                 </button>
               </div>
@@ -1066,7 +1185,10 @@ export default function Index() {
         </header>
 
         {/* Chat Messages - Scrollable Area */}
-        <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-6 relative">
+        <div
+          ref={chatContainerRef}
+          className="flex-1 overflow-y-auto px-6 py-6 space-y-6 relative"
+        >
           {/* Modern Voice Animation Overlay */}
           {isRecording && (
             <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
@@ -1079,12 +1201,22 @@ export default function Index() {
                     </div>
                     {/* Ripple effect */}
                     <div className="absolute inset-0 rounded-full border-4 border-white/30 animate-ping"></div>
-                    <div className="absolute -inset-2 rounded-full border-2 border-white/20 animate-ping" style={{animationDelay: '0.5s'}}></div>
-                    <div className="absolute -inset-4 rounded-full border border-white/10 animate-ping" style={{animationDelay: '1s'}}></div>
+                    <div
+                      className="absolute -inset-2 rounded-full border-2 border-white/20 animate-ping"
+                      style={{ animationDelay: "0.5s" }}
+                    ></div>
+                    <div
+                      className="absolute -inset-4 rounded-full border border-white/10 animate-ping"
+                      style={{ animationDelay: "1s" }}
+                    ></div>
                   </div>
                   <div className="text-center">
-                    <h3 className="text-white text-xl font-semibold mb-2">Listening...</h3>
-                    <p className="text-white/80 text-sm">Speak clearly and I'll understand</p>
+                    <h3 className="text-white text-xl font-semibold mb-2">
+                      Listening...
+                    </h3>
+                    <p className="text-white/80 text-sm">
+                      Speak clearly and I'll understand
+                    </p>
                   </div>
                   {/* Sound waves animation */}
                   <div className="flex items-center gap-1">
@@ -1095,7 +1227,7 @@ export default function Index() {
                         style={{
                           height: `${Math.random() * 30 + 10}px`,
                           animationDelay: `${i * 0.1}s`,
-                          animationDuration: '0.8s'
+                          animationDuration: "0.8s",
                         }}
                       />
                     ))}
@@ -1113,11 +1245,13 @@ export default function Index() {
           {messages.map((message, index) => (
             <div
               key={message.id}
-              className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-fadeInUp mb-4`}
+              className={`flex ${message.type === "user" ? "justify-end" : "justify-start"} animate-fadeInUp mb-4`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className={`${message.type === 'user' ? 'max-w-xs ml-auto' : 'max-w-4xl mr-auto'} ${message.type === 'user' ? 'bg-blue-600 text-white rounded-2xl rounded-br-md p-4' : 'bg-transparent text-gray-900 p-2'}`}>
-                {message.type === 'user' ? (
+              <div
+                className={`${message.type === "user" ? "max-w-xs ml-auto" : "max-w-4xl mr-auto"} ${message.type === "user" ? "bg-blue-600 text-white rounded-2xl rounded-br-md p-4" : "bg-transparent text-gray-900 p-2"}`}
+              >
+                {message.type === "user" ? (
                   <p className="text-sm">{message.content}</p>
                 ) : (
                   <div>
@@ -1127,28 +1261,36 @@ export default function Index() {
                         if (typingMessageId === message.id && displayedText) {
                           return (
                             <div className="prose-sm text-gray-900">
-                              <div className="whitespace-pre-wrap">{displayedText}</div>
-                              <span className="animate-pulse text-blue-500">|</span>
+                              <div className="whitespace-pre-wrap">
+                                {displayedText}
+                              </div>
+                              <span className="animate-pulse text-blue-500">
+                                |
+                              </span>
                             </div>
                           );
                         }
 
                         // Show complete message
-                        const answer = message.response?.answer || '';
+                        const answer = message.response?.answer || "";
                         return (
                           <div>
                             <div className="prose-sm text-gray-900 whitespace-pre-wrap leading-relaxed">
                               {answer}
                             </div>
                             {/* Show Hutech logo when no images are present */}
-                            {(!message.response?.related_content || message.response.related_content.length === 0) && (
+                            {(!message.response?.related_content ||
+                              message.response.related_content.length ===
+                                0) && (
                               <div className="mt-4 flex items-center gap-2 opacity-70">
                                 <img
                                   src="https://hutechsolutions.com/wp-content/uploads/2024/08/hutech-logo-1.svg"
                                   alt="Hutech Solutions"
                                   className="h-6 w-auto"
                                 />
-                                <span className="text-xs text-gray-500">Powered by Hutech AI</span>
+                                <span className="text-xs text-gray-500">
+                                  Powered by Hutech AI
+                                </span>
                               </div>
                             )}
                           </div>
@@ -1157,65 +1299,97 @@ export default function Index() {
                     </div>
 
                     {/* Show related content only after typing is complete */}
-                    {(showImages[message.id] || (typingMessageId !== message.id && typingMessageId !== null) || typingMessageId === null) &&
-                     message.response?.related_content &&
-                     message.response.related_content.length > 0 && (
-                      <RelatedContentCarousel content={message.response.related_content} />
-                    )}
+                    {(showImages[message.id] ||
+                      (typingMessageId !== message.id &&
+                        typingMessageId !== null) ||
+                      typingMessageId === null) &&
+                      message.response?.related_content &&
+                      message.response.related_content.length > 0 && (
+                        <RelatedContentCarousel
+                          content={message.response.related_content}
+                        />
+                      )}
 
                     {/* File download links when file_links are present */}
-                    {(showImages[message.id] || (typingMessageId !== message.id && typingMessageId !== null) || typingMessageId === null) &&
-                     message.response?.file_links &&
-                     message.response.file_links.length > 0 && (
-                      <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                        <h6 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14,2 14,8 20,8"/>
-                            <line x1="16" y1="13" x2="8" y2="13"/>
-                            <line x1="16" y1="17" x2="8" y2="17"/>
-                            <polyline points="10,9 9,9 8,9"/>
-                          </svg>
-                          Available Files
-                        </h6>
-                        <div className="space-y-2">
-                          {message.response.file_links.map((link, index) => (
-                            <a
-                              key={index}
-                              href={link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-2 p-2 bg-white rounded border hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 group"
+                    {(showImages[message.id] ||
+                      (typingMessageId !== message.id &&
+                        typingMessageId !== null) ||
+                      typingMessageId === null) &&
+                      message.response?.file_links &&
+                      message.response.file_links.length > 0 && (
+                        <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                          <h6 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
                             >
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-600">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                <polyline points="7,10 12,15 17,10"/>
-                                <line x1="12" y1="15" x2="12" y2="3"/>
-                              </svg>
-                              <span className="text-sm text-gray-700 group-hover:text-blue-600 flex-1">
-                                {link.split('/').pop() || `File ${index + 1}`}
-                              </span>
-                              <span className="text-xs text-gray-500 group-hover:text-blue-500">Download</span>
-                            </a>
-                          ))}
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                              <polyline points="14,2 14,8 20,8" />
+                              <line x1="16" y1="13" x2="8" y2="13" />
+                              <line x1="16" y1="17" x2="8" y2="17" />
+                              <polyline points="10,9 9,9 8,9" />
+                            </svg>
+                            Available Files
+                          </h6>
+                          <div className="space-y-2">
+                            {message.response.file_links.map((link, index) => (
+                              <a
+                                key={index}
+                                href={link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 p-2 bg-white rounded border hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 group"
+                              >
+                                <svg
+                                  width="14"
+                                  height="14"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  className="text-blue-600"
+                                >
+                                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                  <polyline points="7,10 12,15 17,10" />
+                                  <line x1="12" y1="15" x2="12" y2="3" />
+                                </svg>
+                                <span className="text-sm text-gray-700 group-hover:text-blue-600 flex-1">
+                                  {link.split("/").pop() || `File ${index + 1}`}
+                                </span>
+                                <span className="text-xs text-gray-500 group-hover:text-blue-500">
+                                  Download
+                                </span>
+                              </a>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </div>
                 )}
               </div>
             </div>
           ))}
 
-
           {isLoading && !isTyping && (
             <div className="flex justify-center animate-fadeInUp">
               <div className="bg-gradient-to-r from-white to-blue-50 border border-blue-200 rounded-2xl p-6 shadow-lg">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full animate-bounce"></div>
-                  <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-3 h-3 bg-gradient-to-r from-pink-500 to-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  <span className="text-gray-700 ml-2 font-medium">AI is thinking...</span>
+                  <div
+                    className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.1s" }}
+                  ></div>
+                  <div
+                    className="w-3 h-3 bg-gradient-to-r from-pink-500 to-blue-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.2s" }}
+                  ></div>
+                  <span className="text-gray-700 ml-2 font-medium">
+                    AI is thinking...
+                  </span>
                 </div>
               </div>
             </div>
@@ -1227,16 +1401,21 @@ export default function Index() {
 
         {/* Recommendations Bar - Above Input */}
         {recommendations.length > 0 && (
-          <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t px-6 py-2 flex-shrink-0`}>
+          <div
+            className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border-t px-6 py-2 flex-shrink-0`}
+          >
             <div className="max-w-4xl mx-auto">
-              <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              <div
+                className="flex gap-2 overflow-x-auto scrollbar-hide pb-1"
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+              >
                 {recommendations.map((rec, index) => (
                   <button
                     key={index}
                     onClick={() => handleQuestionSubmit(rec)}
-                    className={`flex-shrink-0 px-3 py-1.5 ${darkMode ? 'bg-blue-900 hover:bg-blue-800 text-blue-200 border-blue-700' : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'} rounded-full text-xs transition-all duration-200 transform hover:scale-105 border`}
+                    className={`flex-shrink-0 px-3 py-1.5 ${darkMode ? "bg-blue-900 hover:bg-blue-800 text-blue-200 border-blue-700" : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"} rounded-full text-xs transition-all duration-200 transform hover:scale-105 border`}
                   >
-                    {rec.length > 30 ? rec.substring(0, 30) + '...' : rec}
+                    {rec.length > 30 ? rec.substring(0, 30) + "..." : rec}
                   </button>
                 ))}
               </div>
@@ -1247,13 +1426,24 @@ export default function Index() {
         {/* Confirmation Popup */}
         {showClearConfirm && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 max-w-sm mx-4 shadow-xl`}>
-              <h3 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-800'} mb-2`}>Clear Chat History</h3>
-              <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`}>Are you sure you want to clear all messages? This action cannot be undone.</p>
+            <div
+              className={`${darkMode ? "bg-gray-800" : "bg-white"} rounded-2xl p-6 max-w-sm mx-4 shadow-xl`}
+            >
+              <h3
+                className={`text-lg font-semibold ${darkMode ? "text-white" : "text-gray-800"} mb-2`}
+              >
+                Clear Chat History
+              </h3>
+              <p
+                className={`${darkMode ? "text-gray-300" : "text-gray-600"} mb-4`}
+              >
+                Are you sure you want to clear all messages? This action cannot
+                be undone.
+              </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowClearConfirm(false)}
-                  className={`flex-1 px-4 py-2 ${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} rounded-lg transition-colors`}
+                  className={`flex-1 px-4 py-2 ${darkMode ? "bg-gray-700 text-gray-300 hover:bg-gray-600" : "bg-gray-100 text-gray-700 hover:bg-gray-200"} rounded-lg transition-colors`}
                 >
                   Cancel
                 </button>
@@ -1279,7 +1469,9 @@ export default function Index() {
         />
 
         {/* Sticky Input Bar */}
-        <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t px-6 py-4 flex-shrink-0`}>
+        <div
+          className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border-t px-6 py-4 flex-shrink-0`}
+        >
           <div className="max-w-4xl mx-auto relative">
             {/* File Upload Inputs (Hidden) */}
             <input
@@ -1303,10 +1495,17 @@ export default function Index() {
             {uploadedFiles.length > 0 && (
               <div className="mb-3 flex flex-wrap gap-2">
                 {uploadedFiles.map((file, index) => (
-                  <div key={index} className="bg-blue-100 px-3 py-1 rounded-full text-sm text-blue-700 flex items-center gap-2">
+                  <div
+                    key={index}
+                    className="bg-blue-100 px-3 py-1 rounded-full text-sm text-blue-700 flex items-center gap-2"
+                  >
                     <span>{file.name}</span>
                     <button
-                      onClick={() => setUploadedFiles(prev => prev.filter((_, i) => i !== index))}
+                      onClick={() =>
+                        setUploadedFiles((prev) =>
+                          prev.filter((_, i) => i !== index),
+                        )
+                      }
                       className="text-blue-500 hover:text-blue-700"
                     >
                       ×
@@ -1318,7 +1517,9 @@ export default function Index() {
 
             {/* Simplified Dot Menu */}
             {showDotMenu && (
-              <div className={`dot-menu-container absolute bottom-20 left-6 ${darkMode ? 'bg-gray-800 border-gray-600 shadow-2xl' : 'bg-white border-gray-200 shadow-2xl'} rounded-2xl p-3 z-10 backdrop-blur-lg border`}>
+              <div
+                className={`dot-menu-container absolute bottom-20 left-6 ${darkMode ? "bg-gray-800 border-gray-600 shadow-2xl" : "bg-white border-gray-200 shadow-2xl"} rounded-2xl p-3 z-10 backdrop-blur-lg border`}
+              >
                 <button
                   onClick={() => {
                     setIsConversationMode(false);
@@ -1326,23 +1527,30 @@ export default function Index() {
                     setRecommendations([]);
                     setShowDotMenu(false);
                   }}
-                  className={`w-full text-left px-4 py-3 text-sm ${darkMode ? 'text-blue-400 hover:bg-gray-700' : 'text-blue-600 hover:bg-blue-50'} rounded-xl flex items-center gap-3 transition-all duration-200 hover:scale-105`}
+                  className={`w-full text-left px-4 py-3 text-sm ${darkMode ? "text-blue-400 hover:bg-gray-700" : "text-blue-600 hover:bg-blue-50"} rounded-xl flex items-center gap-3 transition-all duration-200 hover:scale-105`}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                   </svg>
                   New Chat
                 </button>
                 <button
                   onClick={() => setShowClearConfirm(true)}
-                  className={`w-full text-left px-4 py-3 text-sm ${darkMode ? 'text-red-400 hover:bg-gray-700' : 'text-red-600 hover:bg-red-50'} rounded-xl flex items-center gap-3 transition-all duration-200 hover:scale-105`}
+                  className={`w-full text-left px-4 py-3 text-sm ${darkMode ? "text-red-400 hover:bg-gray-700" : "text-red-600 hover:bg-red-50"} rounded-xl flex items-center gap-3 transition-all duration-200 hover:scale-105`}
                 >
                   <Trash2 size={16} />
                   Clear Chat
                 </button>
                 <button
                   onClick={downloadChatAsPDF}
-                  className={`w-full text-left px-4 py-3 text-sm ${darkMode ? 'text-green-400 hover:bg-gray-700' : 'text-green-600 hover:bg-green-50'} rounded-xl flex items-center gap-3 transition-all duration-200 hover:scale-105`}
+                  className={`w-full text-left px-4 py-3 text-sm ${darkMode ? "text-green-400 hover:bg-gray-700" : "text-green-600 hover:bg-green-50"} rounded-xl flex items-center gap-3 transition-all duration-200 hover:scale-105`}
                 >
                   <Download size={16} />
                   Download PDF
@@ -1350,14 +1558,18 @@ export default function Index() {
               </div>
             )}
 
-            <div className={`flex items-center gap-3 ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-full p-3 transition-all duration-300 ${isLoading ? 'bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-2 border-blue-300 shadow-lg scale-105' : `${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'} hover:shadow-md`}`}>
+            <div
+              className={`flex items-center gap-3 ${darkMode ? "bg-gray-700" : "bg-gray-100"} rounded-full p-3 transition-all duration-300 ${isLoading ? "bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-2 border-blue-300 shadow-lg scale-105" : `${darkMode ? "hover:bg-gray-600" : "hover:bg-gray-200"} hover:shadow-md`}`}
+            >
               {/* Left side - Voice only */}
               <div className="flex items-center gap-2">
                 {/* Voice button */}
                 <button
                   onClick={handleVoiceInput}
                   className={`p-2 transition-colors duration-200 ${
-                    isRecording ? 'text-red-500 animate-pulse' : `${darkMode ? 'text-gray-400 hover:text-blue-400' : 'text-gray-500 hover:text-blue-600'}`
+                    isRecording
+                      ? "text-red-500 animate-pulse"
+                      : `${darkMode ? "text-gray-400 hover:text-blue-400" : "text-gray-500 hover:text-blue-600"}`
                   }`}
                   title="Voice input"
                 >
@@ -1370,10 +1582,10 @@ export default function Index() {
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleInputSubmit()}
+                onKeyPress={(e) => e.key === "Enter" && handleInputSubmit()}
                 placeholder={isRecording ? "Listening..." : "How can I help?"}
                 disabled={isLoading || isRecording}
-                className={`flex-1 bg-transparent outline-none ${darkMode ? 'text-white placeholder-gray-400' : 'text-gray-800 placeholder-gray-500'} disabled:opacity-50`}
+                className={`flex-1 bg-transparent outline-none ${darkMode ? "text-white placeholder-gray-400" : "text-gray-800 placeholder-gray-500"} disabled:opacity-50`}
               />
 
               {/* Right side controls */}
@@ -1381,17 +1593,31 @@ export default function Index() {
                 {/* Dark mode toggle */}
                 <button
                   onClick={() => setDarkMode(!darkMode)}
-                  className={`p-2 ${darkMode ? 'text-gray-400 hover:text-blue-400' : 'text-gray-500 hover:text-blue-600'} transition-colors duration-200`}
+                  className={`p-2 ${darkMode ? "text-gray-400 hover:text-blue-400" : "text-gray-500 hover:text-blue-600"} transition-colors duration-200`}
                   title="Toggle dark mode"
                 >
                   {darkMode ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="5"/>
-                      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="5" />
+                      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
                     </svg>
                   ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                     </svg>
                   )}
                 </button>
@@ -1399,13 +1625,20 @@ export default function Index() {
                 {/* Dot menu */}
                 <button
                   onClick={() => setShowDotMenu(!showDotMenu)}
-                  className={`p-2 ${darkMode ? 'text-gray-400 hover:text-blue-400' : 'text-gray-500 hover:text-blue-600'} transition-colors duration-200`}
+                  className={`p-2 ${darkMode ? "text-gray-400 hover:text-blue-400" : "text-gray-500 hover:text-blue-600"} transition-colors duration-200`}
                   title="More options"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="1"/>
-                    <circle cx="12" cy="5" r="1"/>
-                    <circle cx="12" cy="19" r="1"/>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <circle cx="12" cy="12" r="1" />
+                    <circle cx="12" cy="5" r="1" />
+                    <circle cx="12" cy="19" r="1" />
                   </svg>
                 </button>
 
@@ -1415,8 +1648,8 @@ export default function Index() {
                   disabled={isLoading || !inputValue.trim() || isRecording}
                   className={`p-2 rounded-full transition-all duration-300 transform ${
                     isLoading || isRecording
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700 hover:scale-105 active:scale-95'
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700 hover:scale-105 active:scale-95"
                   } text-white disabled:opacity-50 disabled:hover:scale-100`}
                 >
                   {isLoading ? (
@@ -1432,9 +1665,13 @@ export default function Index() {
 
         {/* Notification */}
         {notification && (
-          <div className={`fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 ${
-            notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-          }`}>
+          <div
+            className={`fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 ${
+              notification.type === "success"
+                ? "bg-green-500 text-white"
+                : "bg-red-500 text-white"
+            }`}
+          >
             {notification.message}
           </div>
         )}
@@ -1443,7 +1680,9 @@ export default function Index() {
   }
 
   return (
-    <div className={`h-screen overflow-hidden ${darkMode ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' : 'bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30'}`}>
+    <div
+      className={`h-screen overflow-hidden ${darkMode ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" : "bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30"}`}
+    >
       {/* Professional Navigation Bar */}
       <header className="bg-white shadow-lg border-b border-gray-200">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1467,19 +1706,34 @@ export default function Index() {
             {/* Navigation Items */}
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-8">
-                <a href="#" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                <a
+                  href="#"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
                   Home
                 </a>
-                <a href="#" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                <a
+                  href="#"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
                   Features
                 </a>
-                <a href="#" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                <a
+                  href="#"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
                   Services
                 </a>
-                <a href="#" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                <a
+                  href="#"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
                   About
                 </a>
-                <a href="#" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                <a
+                  href="#"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
                   Contact
                 </a>
               </div>
@@ -1493,17 +1747,26 @@ export default function Index() {
                 title="Open Chat Assistant"
               >
                 <div className="relative">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="relative z-10">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                    <path d="M13 8H7"/>
-                    <path d="M17 12H7"/>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="relative z-10"
+                  >
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    <path d="M13 8H7" />
+                    <path d="M17 12H7" />
                   </svg>
                   <div className="absolute inset-0 bg-white/30 rounded-full animate-ping opacity-75"></div>
                 </div>
-                <span className="hidden sm:inline text-sm font-semibold tracking-wide">Chat</span>
+                <span className="hidden sm:inline text-sm font-semibold tracking-wide">
+                  Chat
+                </span>
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
               </button>
-
             </div>
           </div>
         </nav>
@@ -1513,14 +1776,19 @@ export default function Index() {
       <div className="flex-1 flex flex-col justify-center px-4 py-3 overflow-hidden max-h-[calc(100vh-140px)]">
         {/* Greeting Section */}
         <div className="text-center mb-6">
-          <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} mb-2`}>
-            Hello, this is an{' '}
+          <h2
+            className={`text-2xl font-bold ${darkMode ? "text-white" : "text-gray-800"} mb-2`}
+          >
+            Hello, this is an{" "}
             <span className="animate-colorCycle font-extrabold">
               AI assistant!
             </span>
           </h2>
-          <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'} max-w-xl mx-auto`}>
-            I will help you find answers to your questions. Here are some examples.
+          <p
+            className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-600"} max-w-xl mx-auto`}
+          >
+            I will help you find answers to your questions. Here are some
+            examples.
           </p>
         </div>
 
@@ -1530,14 +1798,18 @@ export default function Index() {
             <button
               key={index}
               onClick={() => handleQuestionSubmit(item.question)}
-              className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-600 hover:border-blue-400 hover:from-gray-700 hover:to-gray-600' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:border-blue-300 hover:from-blue-50 hover:to-purple-50'} border rounded-lg p-2 hover:shadow-lg transition-all duration-300 text-left group transform hover:scale-105 animate-fadeInUp`}
+              className={`${darkMode ? "bg-gradient-to-br from-gray-800 to-gray-700 border-gray-600 hover:border-blue-400 hover:from-gray-700 hover:to-gray-600" : "bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:border-blue-300 hover:from-blue-50 hover:to-purple-50"} border rounded-lg p-2 hover:shadow-lg transition-all duration-300 text-left group transform hover:scale-105 animate-fadeInUp`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div className="text-base mb-1">{item.icon}</div>
-              <h3 className={`font-medium ${darkMode ? 'text-white group-hover:text-blue-400' : 'text-gray-800 group-hover:text-blue-600'} mb-1 text-xs leading-tight`}>
+              <h3
+                className={`font-medium ${darkMode ? "text-white group-hover:text-blue-400" : "text-gray-800 group-hover:text-blue-600"} mb-1 text-xs leading-tight`}
+              >
                 {item.category}
               </h3>
-              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} leading-tight line-clamp-2`}>
+              <p
+                className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-600"} leading-tight line-clamp-2`}
+              >
                 {item.question}
               </p>
             </button>
@@ -1546,7 +1818,9 @@ export default function Index() {
       </div>
 
       {/* Input Bar */}
-      <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t px-4 py-2 flex-shrink-0`}>
+      <div
+        className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border-t px-4 py-2 flex-shrink-0`}
+      >
         <div className="max-w-3xl mx-auto relative">
           {/* File Upload Inputs (Hidden) */}
           <input
@@ -1562,10 +1836,17 @@ export default function Index() {
           {uploadedFiles.length > 0 && (
             <div className="mb-3 flex flex-wrap gap-2">
               {uploadedFiles.map((file, index) => (
-                <div key={index} className="bg-blue-100 px-3 py-1 rounded-full text-sm text-blue-700 flex items-center gap-2">
+                <div
+                  key={index}
+                  className="bg-blue-100 px-3 py-1 rounded-full text-sm text-blue-700 flex items-center gap-2"
+                >
                   <span>{file.name}</span>
                   <button
-                    onClick={() => setUploadedFiles(prev => prev.filter((_, i) => i !== index))}
+                    onClick={() =>
+                      setUploadedFiles((prev) =>
+                        prev.filter((_, i) => i !== index),
+                      )
+                    }
                     className="text-blue-500 hover:text-blue-700"
                   >
                     ×
@@ -1575,15 +1856,18 @@ export default function Index() {
             </div>
           )}
 
-
-          <div className={`flex items-center gap-3 ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-full p-3 transition-all duration-300 ${isLoading ? 'bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-2 border-blue-300 shadow-lg scale-105' : `${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'} hover:shadow-md`}`}>
+          <div
+            className={`flex items-center gap-3 ${darkMode ? "bg-gray-700" : "bg-gray-100"} rounded-full p-3 transition-all duration-300 ${isLoading ? "bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-2 border-blue-300 shadow-lg scale-105" : `${darkMode ? "hover:bg-gray-600" : "hover:bg-gray-200"} hover:shadow-md`}`}
+          >
             {/* Left side - Voice only */}
             <div className="flex items-center gap-2">
               {/* Voice button */}
               <button
                 onClick={handleVoiceInput}
                 className={`p-2 transition-colors duration-200 ${
-                  isRecording ? 'text-red-500 animate-pulse' : `${darkMode ? 'text-gray-400 hover:text-blue-400' : 'text-gray-500 hover:text-blue-600'}`
+                  isRecording
+                    ? "text-red-500 animate-pulse"
+                    : `${darkMode ? "text-gray-400 hover:text-blue-400" : "text-gray-500 hover:text-blue-600"}`
                 }`}
                 title="Voice input"
               >
@@ -1596,10 +1880,10 @@ export default function Index() {
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleInputSubmit()}
+              onKeyPress={(e) => e.key === "Enter" && handleInputSubmit()}
               placeholder={isRecording ? "Listening..." : "How can I help?"}
               disabled={isLoading || isRecording}
-              className={`flex-1 bg-transparent outline-none ${darkMode ? 'text-white placeholder-gray-400' : 'text-gray-800 placeholder-gray-500'} disabled:opacity-50`}
+              className={`flex-1 bg-transparent outline-none ${darkMode ? "text-white placeholder-gray-400" : "text-gray-800 placeholder-gray-500"} disabled:opacity-50`}
             />
 
             {/* Right side controls */}
@@ -1607,17 +1891,31 @@ export default function Index() {
               {/* Dark mode toggle */}
               <button
                 onClick={() => setDarkMode(!darkMode)}
-                className={`p-2 ${darkMode ? 'text-gray-400 hover:text-blue-400' : 'text-gray-500 hover:text-blue-600'} transition-colors duration-200`}
+                className={`p-2 ${darkMode ? "text-gray-400 hover:text-blue-400" : "text-gray-500 hover:text-blue-600"} transition-colors duration-200`}
                 title="Toggle dark mode"
               >
                 {darkMode ? (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="5"/>
-                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <circle cx="12" cy="12" r="5" />
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
                   </svg>
                 ) : (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                   </svg>
                 )}
               </button>
@@ -1625,13 +1923,20 @@ export default function Index() {
               {/* Dot menu */}
               <button
                 onClick={() => setShowDotMenu(!showDotMenu)}
-                className={`p-2 ${darkMode ? 'text-gray-400 hover:text-blue-400' : 'text-gray-500 hover:text-blue-600'} transition-colors duration-200`}
+                className={`p-2 ${darkMode ? "text-gray-400 hover:text-blue-400" : "text-gray-500 hover:text-blue-600"} transition-colors duration-200`}
                 title="More options"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="1"/>
-                  <circle cx="12" cy="5" r="1"/>
-                  <circle cx="12" cy="19" r="1"/>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="12" cy="5" r="1" />
+                  <circle cx="12" cy="19" r="1" />
                 </svg>
               </button>
 
@@ -1641,8 +1946,8 @@ export default function Index() {
                 disabled={isLoading || !inputValue.trim() || isRecording}
                 className={`p-2 rounded-full transition-all duration-300 transform ${
                   isLoading || isRecording
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700 hover:scale-105 active:scale-95'
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700 hover:scale-105 active:scale-95"
                 } text-white disabled:opacity-50 disabled:hover:scale-100`}
               >
                 {isLoading ? (
@@ -1658,9 +1963,13 @@ export default function Index() {
 
       {/* Notification */}
       {notification && (
-        <div className={`fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 ${
-          notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-        }`}>
+        <div
+          className={`fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 ${
+            notification.type === "success"
+              ? "bg-green-500 text-white"
+              : "bg-red-500 text-white"
+          }`}
+        >
           {notification.message}
         </div>
       )}
