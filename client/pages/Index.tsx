@@ -976,7 +976,7 @@ export default function Index() {
       } else if (line.startsWith('• ')) {
         return (
           <div key={index} className="ml-4 mb-1 text-gray-700">
-            {line.replace('• ', '• ')}
+            {line.replace('• ', '��� ')}
           </div>
         );
       } else if (line.trim()) {
@@ -1257,7 +1257,7 @@ export default function Index() {
               </div>
             )}
 
-            {/* Modern Dot Menu */}
+            {/* Simplified Dot Menu */}
             {showDotMenu && (
               <div className={`dot-menu-container absolute bottom-20 left-6 ${darkMode ? 'bg-gray-800 border-gray-600 shadow-2xl' : 'bg-white border-gray-200 shadow-2xl'} rounded-2xl p-3 z-10 backdrop-blur-lg border`}>
                 <button
@@ -1287,37 +1287,6 @@ export default function Index() {
                 >
                   <Download size={16} />
                   Download PDF
-                </button>
-                <div className={`h-px ${darkMode ? 'bg-gray-600' : 'bg-gray-200'} my-2`}></div>
-                <button
-                  onClick={handleImageUpload}
-                  className={`w-full text-left px-4 py-3 text-sm ${darkMode ? 'text-purple-400 hover:bg-gray-700' : 'text-purple-600 hover:bg-purple-50'} rounded-xl flex items-center gap-3 transition-all duration-200 hover:scale-105`}
-                >
-                  <Image size={16} />
-                  Upload Photo
-                </button>
-                <button
-                  onClick={handleFileUpload}
-                  className={`w-full text-left px-4 py-3 text-sm ${darkMode ? 'text-orange-400 hover:bg-gray-700' : 'text-orange-600 hover:bg-orange-50'} rounded-xl flex items-center gap-3 transition-all duration-200 hover:scale-105`}
-                >
-                  <FileText size={16} />
-                  Upload File
-                </button>
-                <button
-                  onClick={() => {
-                    setUploadedFiles([]);
-                    setShowDotMenu(false);
-                    showNotification('All uploads cleared!', 'success');
-                  }}
-                  className={`w-full text-left px-4 py-3 text-sm ${darkMode ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50'} rounded-xl flex items-center gap-3 transition-all duration-200 hover:scale-105`}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="3,6 5,6 21,6"/>
-                    <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/>
-                    <line x1="10" y1="11" x2="10" y2="17"/>
-                    <line x1="14" y1="11" x2="14" y2="17"/>
-                  </svg>
-                  Delete Uploads
                 </button>
               </div>
             )}
