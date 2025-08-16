@@ -1456,31 +1456,31 @@ export default function Index() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 overflow-hidden">
+      <div className="flex-1 flex flex-col justify-center px-6 py-4 overflow-hidden max-h-[calc(100vh-120px)]">
         {/* Greeting Section */}
-        <div className="text-center mb-12">
-          <h2 className={`text-4xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} mb-4`}>
+        <div className="text-center mb-8">
+          <h2 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} mb-3`}>
             Hello, this is an{' '}
             <span className="animate-colorCycle font-extrabold">
               AI assistant!
             </span>
           </h2>
-          <p className={`text-lg ${darkMode ? 'text-gray-300' : 'text-gray-600'} max-w-2xl`}>
+          <p className={`text-base ${darkMode ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
             I will help you find answers to your questions or support a conversation on any topic. Here are some examples.
           </p>
         </div>
 
         {/* Question Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 max-w-4xl w-full mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 max-w-4xl w-full mx-auto">
           {predefinedQuestions.map((item, index) => (
             <button
               key={index}
               onClick={() => handleQuestionSubmit(item.question)}
-              className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-600 hover:border-blue-400 hover:from-gray-700 hover:to-gray-600' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:border-blue-300 hover:from-blue-50 hover:to-purple-50'} border rounded-xl p-4 hover:shadow-xl transition-all duration-300 text-left group transform hover:scale-105 hover:-translate-y-1 animate-fadeInUp`}
+              className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-600 hover:border-blue-400 hover:from-gray-700 hover:to-gray-600' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:border-blue-300 hover:from-blue-50 hover:to-purple-50'} border rounded-xl p-3 hover:shadow-xl transition-all duration-300 text-left group transform hover:scale-105 hover:-translate-y-1 animate-fadeInUp`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="text-xl mb-2">{item.icon}</div>
-              <h3 className={`font-medium ${darkMode ? 'text-white group-hover:text-blue-400' : 'text-gray-800 group-hover:text-blue-600'} mb-1 text-sm`}>
+              <div className="text-lg mb-2">{item.icon}</div>
+              <h3 className={`font-medium ${darkMode ? 'text-white group-hover:text-blue-400' : 'text-gray-800 group-hover:text-blue-600'} mb-1 text-xs`}>
                 {item.category}
               </h3>
               <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
