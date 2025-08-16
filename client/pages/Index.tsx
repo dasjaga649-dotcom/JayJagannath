@@ -805,9 +805,9 @@ export default function Index() {
             className={`block ${darkMode ? 'border-gray-600' : 'border-gray-200'} border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:scale-[1.03]`}
           >
             <img
-              src={content[0].image}
+              src={content[0].image || "https://hutechsolutions.com/wp-content/uploads/2024/08/hutech-logo-1.svg"}
               alt={content[0].title}
-              className="w-full h-48 object-cover"
+              className="w-full h-48 object-cover bg-gray-100 p-4"
             />
             <div className="p-4 bg-transparent">
               <h5 className={`font-medium text-sm hover:text-blue-600 cursor-pointer ${darkMode ? 'text-white' : 'text-gray-800'}`}>
