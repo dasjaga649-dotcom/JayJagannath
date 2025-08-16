@@ -976,7 +976,7 @@ export default function Index() {
       } else if (line.startsWith('• ')) {
         return (
           <div key={index} className="ml-4 mb-1 text-gray-700">
-            {line.replace('• ', '��� ')}
+            {line.replace('• ', '• ')}
           </div>
         );
       } else if (line.trim()) {
@@ -1512,25 +1512,6 @@ export default function Index() {
             </div>
           )}
 
-          {/* Modern Dot Menu */}
-          {showDotMenu && (
-            <div className={`dot-menu-container absolute bottom-20 left-6 ${darkMode ? 'bg-gray-800 border-gray-600 shadow-2xl' : 'bg-white border-gray-200 shadow-2xl'} rounded-2xl p-3 z-10 backdrop-blur-lg border`}>
-              <button
-                onClick={handleImageUpload}
-                className={`w-full text-left px-4 py-3 text-sm ${darkMode ? 'text-purple-400 hover:bg-gray-700' : 'text-purple-600 hover:bg-purple-50'} rounded-xl flex items-center gap-3 transition-all duration-200 hover:scale-105`}
-              >
-                <Image size={16} />
-                Upload Photo
-              </button>
-              <button
-                onClick={handleFileUpload}
-                className={`w-full text-left px-4 py-3 text-sm ${darkMode ? 'text-orange-400 hover:bg-gray-700' : 'text-orange-600 hover:bg-orange-50'} rounded-xl flex items-center gap-3 transition-all duration-200 hover:scale-105`}
-              >
-                <FileText size={16} />
-                Upload File
-              </button>
-            </div>
-          )}
 
           <div className={`flex items-center gap-3 ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-full p-3 transition-all duration-300 ${isLoading ? 'bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-2 border-blue-300 shadow-lg scale-105' : `${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'} hover:shadow-md`}`}>
             {/* Left side - Voice only */}
