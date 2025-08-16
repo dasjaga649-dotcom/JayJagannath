@@ -652,11 +652,18 @@ export default function Index() {
     const regularImageUrls = detectImageUrls(processedText);
     images.push(...regularImageUrls);
 
+    // Fix malformed HTML tags
+    processedText = processedText.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+
+    // Fix malformed list items like <li><li> to proper <li>
+    processedText = processedText.replace(/<li><li>/g, '<li>');
+    processedText = processedText.replace(/<\/li><\/li>/g, '</li>');
+
     // Handle HTML lists first
     let formattedContent: JSX.Element[] = [];
 
     // Check if text contains HTML list tags
-    if (processedText.includes('<ul>') || processedText.includes('<ol>')) {
+    if (processedText.includes('<ul>') || processedText.includes('<ol>') || processedText.includes('<li>')) {
       // Split by HTML list blocks
       const parts = processedText.split(/(<\/?(?:ul|ol|li)[^>]*>)/gi);
       let currentList: JSX.Element[] = [];
