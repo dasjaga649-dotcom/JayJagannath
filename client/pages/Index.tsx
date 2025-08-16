@@ -994,7 +994,7 @@ export default function Index() {
     return (
       <div className={`h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} flex flex-col overflow-hidden`}>
         {/* Professional Navigation Bar */}
-        <header className={`${darkMode ? 'bg-gray-900' : 'bg-gradient-to-r from-blue-800 to-blue-900'} shadow-lg flex-shrink-0`}>
+        <header className="bg-white shadow-lg flex-shrink-0 border-b border-gray-200">
           <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               {/* Logo Section */}
