@@ -839,9 +839,9 @@ export default function Index() {
         >
           <div className="relative">
             <img
-              src={currentContent.image}
+              src={currentContent.image || "https://hutechsolutions.com/wp-content/uploads/2024/08/hutech-logo-1.svg"}
               alt={currentContent.title}
-              className="w-full h-48 object-cover"
+              className="w-full h-48 object-cover bg-gray-100 p-4"
             />
 
             {/* Navigation Arrows */}
