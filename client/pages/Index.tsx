@@ -1492,7 +1492,7 @@ export default function Index() {
       </div>
 
       {/* Input Bar */}
-      <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t px-6 py-4`}>
+      <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t px-6 py-3 flex-shrink-0`}>
         <div className="max-w-4xl mx-auto relative">
           {/* File Upload Inputs (Hidden) */}
           <input
