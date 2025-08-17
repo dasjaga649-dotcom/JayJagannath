@@ -1523,7 +1523,6 @@ export default function Index() {
                 <button
                   onClick={() => {
                     setIsConversationMode(false);
-                    setMessages([]);
                     setRecommendations([]);
                     setShowDotMenu(false);
                   }}
