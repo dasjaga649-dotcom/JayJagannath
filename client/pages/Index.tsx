@@ -114,9 +114,30 @@ export default function Index() {
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
     if (messagesEndRef.current && isConversationMode) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      // Scroll to bottom with smooth behavior
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+        inline: "nearest"
+      });
     }
   }, [messages, isConversationMode]);
+
+  // Additional scroll effect for new messages and typing
+  useEffect(() => {
+    if (messagesEndRef.current && (isLoading || typingMessageId)) {
+      const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+          inline: "nearest"
+        });
+      };
+      // Small delay to ensure content is rendered
+      const timer = setTimeout(scrollToBottom, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, typingMessageId, displayedText]);
 
   const handleQuestionSubmit = async (question: string) => {
     const userMessage: Message = {
@@ -1187,7 +1208,8 @@ export default function Index() {
         {/* Chat Messages - Scrollable Area */}
         <div
           ref={chatContainerRef}
-          className="flex-1 overflow-y-auto px-6 py-6 space-y-6 relative"
+          className="flex-1 overflow-y-auto px-6 py-6 space-y-6 relative scroll-smooth"
+          style={{ scrollBehavior: 'smooth' }}
         >
           {/* Modern Voice Animation Overlay */}
           {isRecording && (
@@ -1413,7 +1435,7 @@ export default function Index() {
           )}
 
           {/* Auto-scroll anchor */}
-          <div ref={messagesEndRef} />
+          <div ref={messagesEndRef} className="h-4" />
         </div>
 
         {/* Recommendations Bar - Above Input */}
