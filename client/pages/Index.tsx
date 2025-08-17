@@ -1269,11 +1269,27 @@ export default function Index() {
 
                         // Show complete message
                         const answer = message.response?.answer || "";
+                        const formatted = formatAnswerText(answer, darkMode);
                         return (
                           <div>
-                            <div className="prose-sm text-gray-900 whitespace-pre-wrap leading-relaxed">
-                              {answer}
+                            <div className="prose-sm text-gray-900 leading-relaxed">
+                              {formatted.formattedText}
                             </div>
+                            {/* Display extracted images from answer */}
+                            {formatted.images.length > 0 && (
+                              <div className="mt-4 space-y-3">
+                                {formatted.images.map((imgUrl, idx) => (
+                                  <div key={idx} className="relative">
+                                    <img
+                                      src={imgUrl}
+                                      alt={`Answer image ${idx + 1}`}
+                                      className="w-full max-w-md h-auto rounded-lg border border-gray-200 shadow-sm"
+                                    />
+                                    <div className="absolute inset-0 bg-black bg-opacity-20 rounded-lg pointer-events-none"></div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                             {/* Show Hutech logo when no images are present */}
                             {(!message.response?.related_content ||
                               message.response.related_content.length ===
