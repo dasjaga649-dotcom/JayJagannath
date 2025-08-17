@@ -1594,9 +1594,14 @@ export default function Index() {
         {/* Recommendations Bar - Above Input */}
         {recommendations.length > 0 && (
           <div
-            className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border-t px-6 py-2 flex-shrink-0`}
+            className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border-t px-6 py-3 flex-shrink-0 shadow-sm`}
           >
             <div className="max-w-4xl mx-auto">
+              <div className="mb-2">
+                <h3 className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+                  Recommended questions:
+                </h3>
+              </div>
               <div
                 className="flex gap-2 overflow-x-auto scrollbar-hide pb-1"
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
@@ -1605,9 +1610,9 @@ export default function Index() {
                   <button
                     key={index}
                     onClick={() => handleQuestionSubmit(rec)}
-                    className={`flex-shrink-0 px-3 py-1.5 ${darkMode ? "bg-blue-900 hover:bg-blue-800 text-blue-200 border-blue-700" : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"} rounded-full text-xs transition-all duration-200 transform hover:scale-105 border`}
+                    className={`flex-shrink-0 px-4 py-2 ${darkMode ? "bg-blue-900 hover:bg-blue-800 text-blue-200 border-blue-700" : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"} rounded-full text-sm transition-all duration-200 transform hover:scale-105 border shadow-sm hover:shadow-md`}
                   >
-                    {rec.length > 30 ? rec.substring(0, 30) + "..." : rec}
+                    {rec.length > 40 ? rec.substring(0, 40) + "..." : rec}
                   </button>
                 ))}
               </div>
