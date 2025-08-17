@@ -135,7 +135,7 @@ export default function Index() {
         requestAnimationFrame(() => {
           messagesEndRef.current?.scrollIntoView({
             behavior: "smooth",
-            block: "nearest"
+            block: "nearest",
           });
         });
       };
@@ -151,7 +151,7 @@ export default function Index() {
         requestAnimationFrame(() => {
           messagesEndRef.current?.scrollIntoView({
             behavior: "smooth",
-            block: "nearest"
+            block: "nearest",
           });
         });
       };
@@ -168,7 +168,7 @@ export default function Index() {
         requestAnimationFrame(() => {
           messagesEndRef.current?.scrollIntoView({
             behavior: "smooth",
-            block: "nearest"
+            block: "nearest",
           });
         });
       };
@@ -721,22 +721,26 @@ export default function Index() {
 
           // Handle specific error types
           switch (event.error) {
-            case 'aborted':
+            case "aborted":
               console.log("Speech recognition was aborted");
               break;
-            case 'audio-capture':
-              alert("No microphone was found. Please check your microphone settings.");
+            case "audio-capture":
+              alert(
+                "No microphone was found. Please check your microphone settings.",
+              );
               break;
-            case 'not-allowed':
-              alert("Microphone permission was denied. Please allow microphone access.");
+            case "not-allowed":
+              alert(
+                "Microphone permission was denied. Please allow microphone access.",
+              );
               break;
-            case 'network':
+            case "network":
               alert("Network error occurred during speech recognition.");
               break;
-            case 'no-speech':
+            case "no-speech":
               console.log("No speech was detected");
               break;
-            case 'service-not-allowed':
+            case "service-not-allowed":
               alert("Speech recognition service is not allowed.");
               break;
             default:
@@ -758,7 +762,6 @@ export default function Index() {
         setRecordingTimer(autoStopTimer);
         recognition.start();
         setVoiceRecognition(recognition);
-
       } catch (error) {
         console.error("Error starting speech recognition:", error);
         setIsRecording(false);
@@ -1131,7 +1134,7 @@ export default function Index() {
             src={images[0]}
             alt="Response image"
             className="w-full h-auto max-h-[500px] object-contain rounded-lg border border-gray-200 shadow-sm"
-            style={{ aspectRatio: 'auto' }}
+            style={{ aspectRatio: "auto" }}
           />
         </div>
       );
@@ -1152,7 +1155,7 @@ export default function Index() {
             src={images[currentIndex]}
             alt={`Response image ${currentIndex + 1}`}
             className="w-full h-auto max-h-[500px] object-contain transition-all duration-300"
-            style={{ aspectRatio: 'auto' }}
+            style={{ aspectRatio: "auto" }}
           />
 
           {/* Navigation Arrows */}
@@ -1329,7 +1332,7 @@ export default function Index() {
         <div
           ref={chatContainerRef}
           className="flex-1 overflow-y-auto px-6 py-6 space-y-6 relative scroll-smooth"
-          style={{ scrollBehavior: 'smooth' }}
+          style={{ scrollBehavior: "smooth" }}
         >
           {/* Modern Voice Animation Overlay */}
           {isRecording && (
@@ -1542,13 +1545,25 @@ export default function Index() {
                       {/* Animated AI avatar */}
                       <div className="relative">
                         <div className="w-12 h-12 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white">
-                            <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z" fill="currentColor"/>
+                          <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            className="text-white"
+                          >
+                            <path
+                              d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"
+                              fill="currentColor"
+                            />
                           </svg>
                         </div>
                         {/* Pulsing ring */}
                         <div className="absolute inset-0 rounded-full border-2 border-blue-400/30 animate-ping"></div>
-                        <div className="absolute -inset-1 rounded-full border border-indigo-300/20 animate-ping" style={{ animationDelay: "0.5s" }}></div>
+                        <div
+                          className="absolute -inset-1 rounded-full border border-indigo-300/20 animate-ping"
+                          style={{ animationDelay: "0.5s" }}
+                        ></div>
                       </div>
 
                       {/* Thinking dots with modern animation */}
@@ -1556,8 +1571,14 @@ export default function Index() {
                         <div className="flex items-center gap-2">
                           <div className="flex gap-1">
                             <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full animate-pulse"></div>
-                            <div className="w-2 h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-pulse" style={{ animationDelay: "0.2s" }}></div>
-                            <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse" style={{ animationDelay: "0.4s" }}></div>
+                            <div
+                              className="w-2 h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-pulse"
+                              style={{ animationDelay: "0.2s" }}
+                            ></div>
+                            <div
+                              className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"
+                              style={{ animationDelay: "0.4s" }}
+                            ></div>
                           </div>
                           <span className="text-gray-700 font-medium text-sm">
                             AI is thinking
@@ -1566,20 +1587,36 @@ export default function Index() {
 
                         {/* Animated progress bar */}
                         <div className="w-32 h-1 bg-gray-200 rounded-full overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full animate-pulse" style={{ width: "60%", animation: "thinking-progress 2s ease-in-out infinite" }}></div>
+                          <div
+                            className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full animate-pulse"
+                            style={{
+                              width: "60%",
+                              animation:
+                                "thinking-progress 2s ease-in-out infinite",
+                            }}
+                          ></div>
                         </div>
                       </div>
                     </div>
 
                     {/* Floating particles effect */}
                     <div className="absolute top-2 right-4">
-                      <div className="w-1 h-1 bg-blue-400/40 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                      <div
+                        className="w-1 h-1 bg-blue-400/40 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.1s" }}
+                      ></div>
                     </div>
                     <div className="absolute top-4 right-2">
-                      <div className="w-1 h-1 bg-indigo-400/40 rounded-full animate-bounce" style={{ animationDelay: "0.3s" }}></div>
+                      <div
+                        className="w-1 h-1 bg-indigo-400/40 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.3s" }}
+                      ></div>
                     </div>
                     <div className="absolute bottom-3 right-6">
-                      <div className="w-1 h-1 bg-purple-400/40 rounded-full animate-bounce" style={{ animationDelay: "0.5s" }}></div>
+                      <div
+                        className="w-1 h-1 bg-purple-400/40 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.5s" }}
+                      ></div>
                     </div>
                   </div>
                 </div>
@@ -1597,7 +1634,9 @@ export default function Index() {
         >
           <div className="max-w-4xl mx-auto">
             <div className="mb-2">
-              <h3 className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+              <h3
+                className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"}`}
+              >
                 Recommended questions:
               </h3>
             </div>
@@ -1605,12 +1644,15 @@ export default function Index() {
               className="flex gap-2 overflow-x-auto scrollbar-hide pb-1"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
-              {(recommendations.length > 0 ? recommendations : [
-                "What services do we provide?",
-                "Where are our offices?",
-                "What is our tech stack?",
-                "What certifications do we have?"
-              ]).map((rec, index) => (
+              {(recommendations.length > 0
+                ? recommendations
+                : [
+                    "What services do we provide?",
+                    "Where are our offices?",
+                    "What is our tech stack?",
+                    "What certifications do we have?",
+                  ]
+              ).map((rec, index) => (
                 <button
                   key={index}
                   onClick={() => handleQuestionSubmit(rec)}
@@ -2065,7 +2107,6 @@ export default function Index() {
           </div>
         </div>
       )}
-
 
       {/* Sticky Input Bar */}
       <div
