@@ -1529,21 +1529,55 @@ export default function Index() {
           ))}
 
           {isLoading && !isTyping && (
-            <div className="flex justify-center animate-fadeInUp">
-              <div className="bg-gradient-to-r from-white to-blue-50 border border-blue-200 rounded-2xl p-6 shadow-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full animate-bounce"></div>
-                  <div
-                    className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.1s" }}
-                  ></div>
-                  <div
-                    className="w-3 h-3 bg-gradient-to-r from-pink-500 to-blue-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
-                  <span className="text-gray-700 ml-2 font-medium">
-                    AI is thinking...
-                  </span>
+            <div className="flex justify-start animate-fadeInUp mb-4">
+              <div className="max-w-4xl mr-auto bg-transparent p-2">
+                <div className="relative">
+                  {/* Modern thinking container */}
+                  <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border border-blue-200/50 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
+                    <div className="flex items-center gap-4">
+                      {/* Animated AI avatar */}
+                      <div className="relative">
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white">
+                            <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z" fill="currentColor"/>
+                          </svg>
+                        </div>
+                        {/* Pulsing ring */}
+                        <div className="absolute inset-0 rounded-full border-2 border-blue-400/30 animate-ping"></div>
+                        <div className="absolute -inset-1 rounded-full border border-indigo-300/20 animate-ping" style={{ animationDelay: "0.5s" }}></div>
+                      </div>
+
+                      {/* Thinking dots with modern animation */}
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <div className="flex gap-1">
+                            <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full animate-pulse"></div>
+                            <div className="w-2 h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-pulse" style={{ animationDelay: "0.2s" }}></div>
+                            <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse" style={{ animationDelay: "0.4s" }}></div>
+                          </div>
+                          <span className="text-gray-700 font-medium text-sm">
+                            AI is thinking
+                          </span>
+                        </div>
+
+                        {/* Animated progress bar */}
+                        <div className="w-32 h-1 bg-gray-200 rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full animate-pulse" style={{ width: "60%", animation: "thinking-progress 2s ease-in-out infinite" }}></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Floating particles effect */}
+                    <div className="absolute top-2 right-4">
+                      <div className="w-1 h-1 bg-blue-400/40 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                    </div>
+                    <div className="absolute top-4 right-2">
+                      <div className="w-1 h-1 bg-indigo-400/40 rounded-full animate-bounce" style={{ animationDelay: "0.3s" }}></div>
+                    </div>
+                    <div className="absolute bottom-3 right-6">
+                      <div className="w-1 h-1 bg-purple-400/40 rounded-full animate-bounce" style={{ animationDelay: "0.5s" }}></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
