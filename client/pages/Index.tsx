@@ -1819,7 +1819,7 @@ export default function Index() {
 
       {/* Sticky Input Bar */}
       <div
-        className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border-t px-4 py-3 flex-shrink-0 sticky bottom-0 z-10 backdrop-blur-sm bg-opacity-95`}
+        className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border-t px-4 py-3 flex-shrink-0 fixed bottom-0 left-0 right-0 z-50 backdrop-blur-sm bg-opacity-95`}
       >
         <div className="max-w-3xl mx-auto relative">
           {/* File Upload Inputs (Hidden) */}
