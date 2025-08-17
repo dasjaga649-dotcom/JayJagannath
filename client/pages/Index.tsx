@@ -130,12 +130,17 @@ export default function Index() {
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
     if (messagesEndRef.current && isConversationMode) {
-      // Scroll to bottom with smooth behavior
-      messagesEndRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-        inline: "nearest"
-      });
+      // Use requestAnimationFrame for smoother scrolling
+      const scrollToBottom = () => {
+        requestAnimationFrame(() => {
+          messagesEndRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest"
+          });
+        });
+      };
+      const timer = setTimeout(scrollToBottom, 50);
+      return () => clearTimeout(timer);
     }
   }, [messages, isConversationMode]);
 
@@ -143,14 +148,15 @@ export default function Index() {
   useEffect(() => {
     if (messagesEndRef.current && (isLoading || typingMessageId)) {
       const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "end",
-          inline: "nearest"
+        requestAnimationFrame(() => {
+          messagesEndRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest"
+          });
         });
       };
       // Small delay to ensure content is rendered
-      const timer = setTimeout(scrollToBottom, 100);
+      const timer = setTimeout(scrollToBottom, 150);
       return () => clearTimeout(timer);
     }
   }, [isLoading, typingMessageId, displayedText]);
@@ -159,14 +165,15 @@ export default function Index() {
   useEffect(() => {
     if (messagesEndRef.current && Object.keys(showImages).length > 0) {
       const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "end",
-          inline: "nearest"
+        requestAnimationFrame(() => {
+          messagesEndRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest"
+          });
         });
       };
       // Delay to ensure images are loaded
-      const timer = setTimeout(scrollToBottom, 300);
+      const timer = setTimeout(scrollToBottom, 200);
       return () => clearTimeout(timer);
     }
   }, [showImages]);
