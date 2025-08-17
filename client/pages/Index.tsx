@@ -111,6 +111,22 @@ export default function Index() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
+  // Cleanup voice recognition on component unmount
+  useEffect(() => {
+    return () => {
+      if (voiceRecognition) {
+        try {
+          voiceRecognition.stop();
+        } catch (error) {
+          console.warn("Error stopping voice recognition on unmount:", error);
+        }
+      }
+      if (recordingTimer) {
+        clearTimeout(recordingTimer);
+      }
+    };
+  }, [voiceRecognition, recordingTimer]);
+
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
     if (messagesEndRef.current && isConversationMode) {
