@@ -1535,7 +1535,7 @@ export default function Index() {
             {/* Simplified Dot Menu */}
             {showDotMenu && (
               <div
-                className={`dot-menu-container absolute bottom-20 left-6 ${darkMode ? "bg-gray-800 border-gray-600 shadow-2xl" : "bg-white border-gray-200 shadow-2xl"} rounded-2xl p-3 z-10 backdrop-blur-lg border`}
+                className={`dot-menu-container absolute bottom-20 right-6 ${darkMode ? "bg-gray-800 border-gray-600 shadow-2xl" : "bg-white border-gray-200 shadow-2xl"} rounded-2xl p-3 z-10 backdrop-blur-lg border`}
               >
                 <button
                   onClick={() => {
