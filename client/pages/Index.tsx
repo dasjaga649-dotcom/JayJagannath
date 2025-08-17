@@ -573,74 +573,157 @@ export default function Index() {
     };
   }, [showDotMenu]);
 
-  // Enhanced voice recording with auto-search
+  // Enhanced voice recording with auto-search and improved error handling
   const handleVoiceInput = async () => {
     if (isRecording) {
+      // Stop recording
       setIsRecording(false);
       if (recordingTimer) {
         clearTimeout(recordingTimer);
         setRecordingTimer(null);
       }
       if (voiceRecognition) {
-        voiceRecognition.stop();
+        try {
+          voiceRecognition.stop();
+        } catch (error) {
+          console.warn("Error stopping speech recognition:", error);
+        }
+        setVoiceRecognition(null);
       }
     } else {
-      setIsRecording(true);
+      // Start recording
+      try {
+        // Clean up any existing recognition first
+        if (voiceRecognition) {
+          try {
+            voiceRecognition.stop();
+          } catch (error) {
+            console.warn("Error stopping existing recognition:", error);
+          }
+          setVoiceRecognition(null);
+        }
 
-      // Initialize speech recognition
-      if (
-        "webkitSpeechRecognition" in window ||
-        "SpeechRecognition" in window
-      ) {
+        // Check if speech recognition is supported
+        if (
+          !("webkitSpeechRecognition" in window) &&
+          !("SpeechRecognition" in window)
+        ) {
+          alert("Speech recognition not supported in this browser");
+          return;
+        }
+
+        // Request microphone permission first
+        try {
+          await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch (permissionError) {
+          alert("Microphone permission is required for voice input");
+          return;
+        }
+
+        setIsRecording(true);
+
         const SpeechRecognition =
           (window as any).webkitSpeechRecognition ||
           (window as any).SpeechRecognition;
         const recognition = new SpeechRecognition();
 
-        recognition.continuous = true;
+        // Configure recognition
+        recognition.continuous = false; // Change to false for better stability
         recognition.interimResults = true;
         recognition.lang = "en-US";
+        recognition.maxAlternatives = 1;
+
+        let finalTranscript = "";
+        let interimTranscript = "";
+
+        recognition.onstart = () => {
+          console.log("Speech recognition started");
+        };
 
         recognition.onresult = (event: any) => {
-          let finalTranscript = "";
+          interimTranscript = "";
+          finalTranscript = "";
+
           for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
-              finalTranscript += event.results[i][0].transcript;
+              finalTranscript += transcript;
+            } else {
+              interimTranscript += transcript;
             }
           }
 
-          if (finalTranscript) {
-            setInputValue(finalTranscript);
+          // Update input with interim or final results
+          setInputValue(finalTranscript + interimTranscript);
+        };
 
-            // Clear existing timer
-            if (recordingTimer) {
-              clearTimeout(recordingTimer);
-            }
+        recognition.onend = () => {
+          console.log("Speech recognition ended");
+          setIsRecording(false);
+          setVoiceRecognition(null);
 
-            // Set 4-second timer for auto-search
-            const timer = setTimeout(() => {
-              setIsRecording(false);
-              recognition.stop();
-              if (finalTranscript.trim()) {
-                handleQuestionSubmit(finalTranscript);
-                setInputValue(""); // Clear input after search
-              }
-            }, 4000);
-
-            setRecordingTimer(timer);
+          // If we have a final transcript, process it
+          if (finalTranscript.trim()) {
+            handleQuestionSubmit(finalTranscript.trim());
+            setInputValue("");
           }
         };
 
         recognition.onerror = (event: any) => {
           console.error("Speech recognition error:", event.error);
           setIsRecording(false);
+          setVoiceRecognition(null);
+
+          // Clear any timers
+          if (recordingTimer) {
+            clearTimeout(recordingTimer);
+            setRecordingTimer(null);
+          }
+
+          // Handle specific error types
+          switch (event.error) {
+            case 'aborted':
+              console.log("Speech recognition was aborted");
+              break;
+            case 'audio-capture':
+              alert("No microphone was found. Please check your microphone settings.");
+              break;
+            case 'not-allowed':
+              alert("Microphone permission was denied. Please allow microphone access.");
+              break;
+            case 'network':
+              alert("Network error occurred during speech recognition.");
+              break;
+            case 'no-speech':
+              console.log("No speech was detected");
+              break;
+            case 'service-not-allowed':
+              alert("Speech recognition service is not allowed.");
+              break;
+            default:
+              console.log("Speech recognition error:", event.error);
+          }
         };
 
+        // Set auto-stop timer (10 seconds max)
+        const autoStopTimer = setTimeout(() => {
+          if (recognition && isRecording) {
+            try {
+              recognition.stop();
+            } catch (error) {
+              console.warn("Error auto-stopping recognition:", error);
+            }
+          }
+        }, 10000);
+
+        setRecordingTimer(autoStopTimer);
         recognition.start();
         setVoiceRecognition(recognition);
-      } else {
-        alert("Speech recognition not supported in this browser");
+
+      } catch (error) {
+        console.error("Error starting speech recognition:", error);
         setIsRecording(false);
+        alert("Failed to start speech recognition. Please try again.");
       }
     }
   };
