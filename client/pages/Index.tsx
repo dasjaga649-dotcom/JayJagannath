@@ -1192,11 +1192,11 @@ export default function Index() {
           {/* Modern Voice Animation Overlay */}
           {isRecording && (
             <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-              <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-3xl p-8 shadow-2xl">
+              <div className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-3xl p-8 shadow-2xl">
                 <div className="flex flex-col items-center gap-6">
                   <div className="relative">
                     {/* Animated mic icon */}
-                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center animate-pulse">
+                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center animate-voicePulse">
                       <Mic size={40} className="text-blue-600" />
                     </div>
                     {/* Ripple effect */}
@@ -1584,7 +1584,7 @@ export default function Index() {
                   onClick={handleVoiceInput}
                   className={`p-2 transition-colors duration-200 ${
                     isRecording
-                      ? "text-red-500 animate-pulse"
+                      ? "text-blue-600 animate-voicePulse"
                       : `${darkMode ? "text-gray-400 hover:text-blue-400" : "text-gray-500 hover:text-blue-600"}`
                   }`}
                   title="Voice input"
@@ -1878,7 +1878,7 @@ export default function Index() {
                 onClick={handleVoiceInput}
                 className={`p-2 transition-colors duration-200 ${
                   isRecording
-                    ? "text-red-500 animate-pulse"
+                    ? "text-blue-600 animate-voicePulse"
                     : `${darkMode ? "text-gray-400 hover:text-blue-400" : "text-gray-500 hover:text-blue-600"}`
                 }`}
                 title="Voice input"
