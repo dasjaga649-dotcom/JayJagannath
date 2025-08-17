@@ -1738,29 +1738,25 @@ export default function Index() {
             <div className="flex items-center space-x-4">
               {/* Chat Bot Button */}
               <button
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2.5 rounded-full flex items-center gap-3 transition-all duration-300 transform hover:scale-110 shadow-lg hover:shadow-xl backdrop-blur-sm border border-white/20"
+                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center gap-2"
                 title="Open Chat Assistant"
               >
-                <div className="relative">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="relative z-10"
-                  >
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                    <path d="M13 8H7" />
-                    <path d="M17 12H7" />
-                  </svg>
-                  <div className="absolute inset-0 bg-white/30 rounded-full animate-ping opacity-75"></div>
-                </div>
-                <span className="hidden sm:inline text-sm font-semibold tracking-wide">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  <path d="M13 8H7" />
+                  <path d="M17 12H7" />
+                </svg>
+                <span className="hidden sm:inline text-sm font-medium">
                   Chat
                 </span>
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               </button>
             </div>
           </div>
