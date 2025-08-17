@@ -2004,29 +2004,6 @@ export default function Index() {
         </div>
       )}
 
-      {/* Recommendations Bar - Above Input (Main Page) */}
-      {!isConversationMode && (
-        <div
-          className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border-t px-4 py-2 flex-shrink-0 fixed bottom-16 left-0 right-0 z-40 backdrop-blur-sm bg-opacity-95`}
-        >
-          <div className="max-w-3xl mx-auto">
-            <div
-              className="flex gap-2 overflow-x-auto scrollbar-hide pb-1"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
-              {predefinedQuestions.slice(0, 4).map((item, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleQuestionSubmit(item.question)}
-                  className={`flex-shrink-0 px-3 py-1.5 ${darkMode ? "bg-blue-900 hover:bg-blue-800 text-blue-200 border-blue-700" : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"} rounded-full text-xs transition-all duration-200 transform hover:scale-105 border`}
-                >
-                  {item.question.length > 30 ? item.question.substring(0, 30) + "..." : item.question}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Sticky Input Bar */}
       <div
