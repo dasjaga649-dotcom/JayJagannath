@@ -155,6 +155,22 @@ export default function Index() {
     }
   }, [isLoading, typingMessageId, displayedText]);
 
+  // Auto-scroll when images and content are shown
+  useEffect(() => {
+    if (messagesEndRef.current && Object.keys(showImages).length > 0) {
+      const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+          inline: "nearest"
+        });
+      };
+      // Delay to ensure images are loaded
+      const timer = setTimeout(scrollToBottom, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [showImages]);
+
   const handleQuestionSubmit = async (question: string) => {
     const userMessage: Message = {
       id: Date.now().toString(),
