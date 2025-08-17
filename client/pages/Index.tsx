@@ -126,7 +126,7 @@ export default function Index() {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setIsConversationMode(true);
     setIsLoading(true);
 
