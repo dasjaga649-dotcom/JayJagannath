@@ -1950,6 +1950,60 @@ export default function Index() {
         </div>
       </div>
 
+      {/* Modern Voice Animation Overlay - Main Page */}
+      {isRecording && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-3xl p-8 shadow-2xl">
+            <div className="flex flex-col items-center gap-6">
+              <div className="relative">
+                {/* Animated mic icon */}
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center animate-voicePulse">
+                  <Mic size={40} className="text-blue-600" />
+                </div>
+                {/* Ripple effect */}
+                <div className="absolute inset-0 rounded-full border-4 border-white/30 animate-ping"></div>
+                <div
+                  className="absolute -inset-2 rounded-full border-2 border-white/20 animate-ping"
+                  style={{ animationDelay: "0.5s" }}
+                ></div>
+                <div
+                  className="absolute -inset-4 rounded-full border border-white/10 animate-ping"
+                  style={{ animationDelay: "1s" }}
+                ></div>
+              </div>
+              <div className="text-center">
+                <h3 className="text-white text-xl font-semibold mb-2">
+                  Listening...
+                </h3>
+                <p className="text-white/80 text-sm">
+                  Speak clearly and I'll understand
+                </p>
+              </div>
+              {/* Sound waves animation */}
+              <div className="flex items-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-1 bg-white/60 rounded-full animate-pulse"
+                    style={{
+                      height: `${Math.random() * 30 + 10}px`,
+                      animationDelay: `${i * 0.1}s`,
+                      animationDuration: "0.8s",
+                    }}
+                  />
+                ))}
+              </div>
+              <button
+                onClick={() => setIsRecording(false)}
+                className="mt-4 px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full transition-all duration-200 backdrop-blur-sm border border-white/20"
+              >
+                Stop Listening
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Sticky Input Bar */}
       <div
         className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border-t px-4 py-3 flex-shrink-0 fixed bottom-0 left-0 right-0 z-50 backdrop-blur-sm bg-opacity-95`}
