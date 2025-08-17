@@ -895,7 +895,8 @@ export default function Index() {
                 "https://hutechsolutions.com/wp-content/uploads/2024/08/hutech-logo-1.svg"
               }
               alt={content[0].title}
-              className="w-full h-48 object-cover bg-gray-100 p-4"
+              className="w-full h-auto max-h-[400px] object-contain bg-gray-100 p-4"
+              style={{ aspectRatio: 'auto' }}
             />
             <div className="p-4 bg-transparent">
               <h5
@@ -934,7 +935,8 @@ export default function Index() {
                 "https://hutechsolutions.com/wp-content/uploads/2024/08/hutech-logo-1.svg"
               }
               alt={currentContent.title}
-              className="w-full h-48 object-cover bg-gray-100 p-4"
+              className="w-full h-auto max-h-[400px] object-contain bg-gray-100 p-4"
+              style={{ aspectRatio: 'auto' }}
             />
 
             {/* Navigation Arrows */}
@@ -987,7 +989,8 @@ export default function Index() {
           <img
             src={images[0]}
             alt="Response image"
-            className="w-full h-64 object-cover rounded-lg border border-gray-200 shadow-sm"
+            className="w-full h-auto max-h-[500px] object-contain rounded-lg border border-gray-200 shadow-sm"
+            style={{ aspectRatio: 'auto' }}
           />
         </div>
       );
@@ -1007,7 +1010,8 @@ export default function Index() {
           <img
             src={images[currentIndex]}
             alt={`Response image ${currentIndex + 1}`}
-            className="w-full h-64 object-cover transition-all duration-300"
+            className="w-full h-auto max-h-[500px] object-contain transition-all duration-300"
+            style={{ aspectRatio: 'auto' }}
           />
 
           {/* Navigation Arrows */}
@@ -1283,7 +1287,8 @@ export default function Index() {
                                     <img
                                       src={imgUrl}
                                       alt={`Answer image ${idx + 1}`}
-                                      className="w-full max-w-md h-auto rounded-lg border border-gray-200 shadow-sm"
+                                      className="w-full max-w-lg h-auto max-h-[600px] object-contain rounded-lg border border-gray-200 shadow-sm"
+                                      style={{ aspectRatio: 'auto' }}
                                     />
                                     <div className="absolute inset-0 bg-black bg-opacity-20 rounded-lg pointer-events-none"></div>
                                   </div>
