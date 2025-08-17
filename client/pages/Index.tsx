@@ -2003,7 +2003,7 @@ export default function Index() {
       {/* Modern Voice Animation Overlay - Main Page */}
       {isRecording && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-3xl p-8 shadow-2xl">
+          <div className="bg-gradient-to-br from-orange-500 via-blue-500 to-orange-600 rounded-3xl p-8 shadow-2xl">
             <div className="flex flex-col items-center gap-6">
               <div className="relative">
                 {/* Animated mic icon */}
