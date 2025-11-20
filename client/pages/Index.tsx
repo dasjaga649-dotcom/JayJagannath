@@ -1,5 +1,17 @@
 import { useState, useEffect, useRef } from "react";
-import { Upload, Mic, Image, Send, User, Settings, ChevronLeft, ChevronRight, Download, Trash2, FileText } from "lucide-react";
+import {
+  Upload,
+  Mic,
+  Image,
+  Send,
+  User,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Trash2,
+  FileText,
+} from "lucide-react";
 
 // Type definitions for the backend response
 interface RelatedContent {
@@ -19,53 +31,53 @@ interface BackendResponse {
 
 interface Message {
   id: string;
-  type: 'user' | 'assistant';
+  type: "user" | "assistant";
   content: string;
   timestamp: Date;
-  response?: BackendResponse['response'];
+  response?: BackendResponse["response"];
 }
 
 const predefinedQuestions = [
   {
     category: "Founder/CEO",
     question: "Who is the founder/who is the CEO?",
-    icon: "👤"
+    icon: "👤",
   },
   {
     category: "Offices",
     question: "Where are our offices?",
-    icon: "🏢"
+    icon: "🏢",
   },
   {
     category: "Services",
     question: "What services do we provide?",
-    icon: "⚙️"
+    icon: "⚙️",
   },
   {
     category: "Industries",
     question: "What industries do we serve?",
-    icon: "🏭"
+    icon: "🏭",
   },
   {
     category: "Stats",
     question: "What are some impressive stats about Hutech?",
-    icon: "📊"
+    icon: "📊",
   },
   {
     category: "Certifications",
     question: "What certifications do we have?",
-    icon: "🏆"
+    icon: "🏆",
   },
   {
     category: "Tech Stack",
     question: "What is our tech stack?",
-    icon: "💻"
+    icon: "💻",
   },
   {
     category: "Contact",
     question: "Give me your contact details.",
-    icon: "📞"
-  }
+    icon: "📞",
+  },
 ];
 
 export default function Index() {
@@ -82,45 +94,110 @@ export default function Index() {
   const [isTyping, setIsTyping] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [voiceRecognition, setVoiceRecognition] = useState<any>(null);
-  const [recordingTimer, setRecordingTimer] = useState<NodeJS.Timeout | null>(null);
+  const [recordingTimer, setRecordingTimer] = useState<NodeJS.Timeout | null>(
+    null,
+  );
   const [showDotMenu, setShowDotMenu] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
   const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
-  const [displayedText, setDisplayedText] = useState<string>('');
-  const [showImages, setShowImages] = useState<{[key: string]: boolean}>({});
+  const [displayedText, setDisplayedText] = useState<string>("");
+  const [showImages, setShowImages] = useState<{ [key: string]: boolean }>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
+  // Cleanup voice recognition on component unmount
+  useEffect(() => {
+    return () => {
+      if (voiceRecognition) {
+        try {
+          voiceRecognition.stop();
+        } catch (error) {
+          console.warn("Error stopping voice recognition on unmount:", error);
+        }
+      }
+      if (recordingTimer) {
+        clearTimeout(recordingTimer);
+      }
+    };
+  }, [voiceRecognition, recordingTimer]);
+
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
     if (messagesEndRef.current && isConversationMode) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      // Use requestAnimationFrame for smoother scrolling
+      const scrollToBottom = () => {
+        requestAnimationFrame(() => {
+          messagesEndRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+          });
+        });
+      };
+      const timer = setTimeout(scrollToBottom, 50);
+      return () => clearTimeout(timer);
     }
   }, [messages, isConversationMode]);
+
+  // Additional scroll effect for new messages and typing
+  useEffect(() => {
+    if (messagesEndRef.current && (isLoading || typingMessageId)) {
+      const scrollToBottom = () => {
+        requestAnimationFrame(() => {
+          messagesEndRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+          });
+        });
+      };
+      // Small delay to ensure content is rendered
+      const timer = setTimeout(scrollToBottom, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, typingMessageId, displayedText]);
+
+  // Auto-scroll when images and content are shown
+  useEffect(() => {
+    if (messagesEndRef.current && Object.keys(showImages).length > 0) {
+      const scrollToBottom = () => {
+        requestAnimationFrame(() => {
+          messagesEndRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+          });
+        });
+      };
+      // Delay to ensure images are loaded
+      const timer = setTimeout(scrollToBottom, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [showImages]);
 
   const handleQuestionSubmit = async (question: string) => {
     const userMessage: Message = {
       id: Date.now().toString(),
-      type: 'user',
+      type: "user",
       content: question,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages([userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setIsConversationMode(true);
     setIsLoading(true);
 
     try {
       // Make API call to backend
-      const response = await fetch('http://localhost:3001/query', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3001/query", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ query: question })
+        body: JSON.stringify({ query: question }),
       });
 
       if (!response.ok) {
@@ -131,14 +208,14 @@ export default function Index() {
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        type: 'assistant',
+        type: "assistant",
         content: "",
         timestamp: new Date(),
-        response: data.response
+        response: data.response,
       };
 
       // Add the message immediately but start typing animation
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
       setRecommendations(data.response.recommendations || []);
 
       // Start typing animation for the response
@@ -147,23 +224,24 @@ export default function Index() {
         speakWithElevenLabs(data.response.answer);
       });
     } catch (error) {
-      console.error('Error calling backend API:', error);
+      console.error("Error calling backend API:", error);
 
       // Show error message to user
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        type: 'assistant',
+        type: "assistant",
         content: "",
         timestamp: new Date(),
         response: {
-          answer: "Sorry, I'm having trouble connecting to the backend service. Please check if the backend is running on http://localhost:3001/query and try again.",
+          answer:
+            "Sorry, I'm having trouble connecting to the backend service. Please check if the backend is running on http://localhost:3001/query and try again.",
           file_links: [],
           recommendations: [],
-          related_content: []
-        }
+          related_content: [],
+        },
       };
 
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
       setRecommendations([]);
     } finally {
       setIsLoading(false);
@@ -183,17 +261,17 @@ export default function Index() {
   };
 
   // Notification system
-  const showNotification = (message: string, type: 'success' | 'error') => {
-    setNotification({message, type});
+  const showNotification = (message: string, type: "success" | "error") => {
+    setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    setUploadedFiles(prev => [...prev, ...files]);
-    showNotification('File uploaded successfully!', 'success');
+    setUploadedFiles((prev) => [...prev, ...files]);
+    showNotification("File uploaded successfully!", "success");
     setShowDotMenu(false);
-    console.log('Uploaded files:', files);
+    console.log("Uploaded files:", files);
   };
 
   // Image upload handler
@@ -203,10 +281,10 @@ export default function Index() {
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    setUploadedFiles(prev => [...prev, ...files]);
-    showNotification('Image uploaded successfully!', 'success');
+    setUploadedFiles((prev) => [...prev, ...files]);
+    showNotification("Image uploaded successfully!", "success");
     setShowDotMenu(false);
-    console.log('Uploaded images:', files);
+    console.log("Uploaded images:", files);
   };
 
   // Typing animation for bot responses (word by word)
@@ -215,13 +293,16 @@ export default function Index() {
     setDisplayedText("");
 
     // Split text into words
-    const words = text.split(' ');
+    const words = text.split(" ");
     let currentWordIndex = 0;
 
     const typeInterval = setInterval(() => {
       if (currentWordIndex < words.length) {
-        setDisplayedText(prev => {
-          const newText = currentWordIndex === 0 ? words[0] : prev + ' ' + words[currentWordIndex];
+        setDisplayedText((prev) => {
+          const newText =
+            currentWordIndex === 0
+              ? words[0]
+              : prev + " " + words[currentWordIndex];
           return newText;
         });
         currentWordIndex++;
@@ -230,94 +311,267 @@ export default function Index() {
         setTypingMessageId(null);
         setDisplayedText("");
         // Show images for this message
-        setShowImages(prev => ({...prev, [messageId]: true}));
+        setShowImages((prev) => ({ ...prev, [messageId]: true }));
         if (callback) callback();
       }
     }, 150); // Adjust speed (words per interval)
   };
 
-  // Download chat as PDF functionality
+  // Modern PDF download functionality
   const downloadChatAsPDF = () => {
-    // Create HTML content for PDF
+    const currentDate = new Date();
+    const formatDate = currentDate.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    // Create modern HTML content for PDF
     const htmlContent = `
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Chat History</title>
+          <meta charset="UTF-8">
+          <title>Hutech AI Assistant - Chat History</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 20px; background: #f9fafb; }
-            .chat-container { max-width: 800px; margin: 0 auto; }
-            .message { margin: 20px 0; display: flex; }
-            .user-message { justify-content: flex-end; }
-            .user-bubble { background: linear-gradient(to right, #3b82f6, #8b5cf6); color: white; padding: 15px; border-radius: 20px; max-width: 60%; }
-            .assistant-message { justify-content: flex-start; }
-            .assistant-bubble { background: white; border: 1px solid #e5e7eb; padding: 15px; border-radius: 20px; max-width: 80%; }
-            .timestamp { font-size: 12px; color: #6b7280; margin-top: 5px; }
-            img { max-width: 100%; height: auto; border-radius: 10px; margin: 10px 0; }
-            .related-content { margin-top: 15px; }
-            .related-item { border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px; margin: 5px 0; }
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+              font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+              line-height: 1.6;
+              color: #1f2937;
+              background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+              min-height: 100vh;
+              padding: 20px;
+            }
+            .container {
+              max-width: 900px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+              overflow: hidden;
+            }
+            .header {
+              background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+              color: white;
+              padding: 40px;
+              text-align: center;
+              position: relative;
+              overflow: hidden;
+            }
+            .header::before {
+              content: '';
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+              opacity: 0.3;
+            }
+            .header-content { position: relative; z-index: 1; }
+            .logo-section { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 20px; }
+            .logo { height: 40px; filter: brightness(0) invert(1); }
+            .company-name { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+            .subtitle { font-size: 16px; opacity: 0.9; margin-bottom: 20px; }
+            .date-info {
+              background: rgba(255, 255, 255, 0.15);
+              padding: 12px 24px;
+              border-radius: 50px;
+              display: inline-block;
+              backdrop-filter: blur(10px);
+              border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            .content { padding: 40px; }
+            .chat-stats {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+              gap: 20px;
+              margin-bottom: 40px;
+            }
+            .stat-card {
+              background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+              padding: 20px;
+              border-radius: 12px;
+              text-align: center;
+              border: 1px solid #e2e8f0;
+            }
+            .stat-number { font-size: 24px; font-weight: 700; color: #1e40af; }
+            .stat-label { font-size: 14px; color: #64748b; margin-top: 4px; }
+            .message {
+              margin: 30px 0;
+              display: flex;
+              gap: 15px;
+              align-items: flex-start;
+            }
+            .user-message { flex-direction: row-reverse; }
+            .message-avatar {
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: 600;
+              font-size: 14px;
+              flex-shrink: 0;
+            }
+            .user-avatar {
+              background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+              color: white;
+            }
+            .ai-avatar {
+              background: linear-gradient(135deg, #10b981, #059669);
+              color: white;
+            }
+            .message-bubble {
+              max-width: 70%;
+              padding: 20px;
+              border-radius: 20px;
+              position: relative;
+              word-wrap: break-word;
+            }
+            .user-bubble {
+              background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+              color: white;
+              border-bottom-right-radius: 8px;
+            }
+            .assistant-bubble {
+              background: #f8fafc;
+              border: 1px solid #e2e8f0;
+              color: #1f2937;
+              border-bottom-left-radius: 8px;
+            }
+            .message-content { margin-bottom: 8px; }
+            .timestamp {
+              font-size: 11px;
+              opacity: 0.7;
+              text-align: right;
+              margin-top: 8px;
+            }
+            .user-bubble .timestamp { color: rgba(255, 255, 255, 0.8); }
+            .assistant-bubble .timestamp { color: #64748b; }
+            .page-footer {
+              background: #f8fafc;
+              padding: 30px;
+              text-align: center;
+              border-top: 1px solid #e2e8f0;
+              color: #64748b;
+              font-size: 14px;
+            }
+            .footer-logo {
+              height: 24px;
+              opacity: 0.7;
+              margin: 0 10px;
+              vertical-align: middle;
+            }
+            @media print {
+              body { background: white; padding: 0; }
+              .container { box-shadow: none; border-radius: 0; }
+            }
           </style>
         </head>
         <body>
-          <div class="chat-container">
-            <h1>Chat History - ${new Date().toLocaleDateString()}</h1>
-            ${messages.map(msg => `
-              <div class="message ${msg.type}-message">
-                <div class="${msg.type}-bubble">
-                  <div>${msg.content}</div>
-                  ${msg.response ? `
-                    <div>${msg.response.answer}</div>
-                    ${msg.response.related_content?.map(content => `
-                      <div class="related-content">
-                        <img src="${content.image}" alt="${content.title}" />
-                        <div><strong>${content.title}</strong></div>
-                      </div>
-                    `).join('') || ''}
-                  ` : ''}
-                  <div class="timestamp">${msg.timestamp.toLocaleString()}</div>
+          <div class="container">
+            <div class="header">
+              <div class="header-content">
+                <div class="logo-section">
+                  <svg class="logo" viewBox="0 0 100 30" fill="currentColor">
+                    <rect x="0" y="10" width="20" height="10" rx="2"/>
+                    <rect x="25" y="5" width="20" height="20" rx="3"/>
+                    <rect x="50" y="8" width="20" height="14" rx="2"/>
+                    <text x="75" y="20" font-size="12" font-weight="bold">HUTECH</text>
+                  </svg>
+                </div>
+                <h1 class="company-name">Hutech Solutions</h1>
+                <p class="subtitle">AI Assistant Chat History</p>
+                <div class="date-info">Generated on ${formatDate}</div>
+              </div>
+            </div>
+
+            <div class="content">
+              <div class="chat-stats">
+                <div class="stat-card">
+                  <div class="stat-number">${messages.length}</div>
+                  <div class="stat-label">Total Messages</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number">${messages.filter((m) => m.type === "user").length}</div>
+                  <div class="stat-label">User Messages</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number">${messages.filter((m) => m.type === "assistant").length}</div>
+                  <div class="stat-label">AI Responses</div>
                 </div>
               </div>
-            `).join('')}
+
+              ${messages
+                .map(
+                  (msg) => `
+                <div class="message ${msg.type}-message">
+                  <div class="message-avatar ${msg.type === "user" ? "user-avatar" : "ai-avatar"}">
+                    ${msg.type === "user" ? "U" : "AI"}
+                  </div>
+                  <div class="message-bubble ${msg.type}-bubble">
+                    <div class="message-content">
+                      ${msg.type === "user" ? msg.content : msg.response?.answer || msg.content}
+                    </div>
+                    <div class="timestamp">${msg.timestamp.toLocaleString()}</div>
+                  </div>
+                </div>
+              `,
+                )
+                .join("")}
+            </div>
+
+            <div class="page-footer">
+              <p>
+                Powered by Hutech Solutions AI Assistant •
+                CMMI Level 3 Certified •
+                Generated: ${currentDate.toISOString()}
+              </p>
+            </div>
           </div>
         </body>
       </html>
     `;
 
-    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const blob = new Blob([htmlContent], { type: "text/html" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = `chat-${new Date().toISOString().split('T')[0]}.html`;
+    link.download = `Hutech-AI-Chat-${new Date().toISOString().split("T")[0]}.html`;
     link.click();
     URL.revokeObjectURL(url);
-    showNotification('PDF downloaded successfully!', 'success');
+    showNotification("Modern chat history downloaded!", "success");
     setShowDotMenu(false);
   };
 
   // Clear chat with confirmation (keeps messages in localStorage)
   const clearChatHistory = () => {
     // Save current messages to history before clearing
-    setChatHistory(prev => [...prev, ...messages]);
+    setChatHistory((prev) => [...prev, ...messages]);
     setMessages([]);
     setRecommendations([]);
     setShowClearConfirm(false);
     setShowDotMenu(false);
-    showNotification('History cleared successfully!', 'error');
+    showNotification("History cleared successfully!", "error");
     // Keep messages in localStorage, just clear current session
-    localStorage.setItem('allChatMessages', JSON.stringify([]));
+    localStorage.setItem("allChatMessages", JSON.stringify([]));
   };
 
   // Load all messages from localStorage on component mount
   useEffect(() => {
-    const savedMessages = localStorage.getItem('allChatMessages');
+    const savedMessages = localStorage.getItem("allChatMessages");
     if (savedMessages) {
       const allMessages = JSON.parse(savedMessages);
       setMessages(allMessages);
 
       // Initialize showImages for all existing messages (they should show images immediately)
-      const imageState: {[key: string]: boolean} = {};
+      const imageState: { [key: string]: boolean } = {};
       allMessages.forEach((msg: Message) => {
-        if (msg.type === 'assistant') {
+        if (msg.type === "assistant") {
           imageState[msg.id] = true;
         }
       });
@@ -328,16 +582,16 @@ export default function Index() {
   // Save all messages to localStorage whenever messages change
   useEffect(() => {
     if (messages.length >= 0) {
-      localStorage.setItem('allChatMessages', JSON.stringify(messages));
+      localStorage.setItem("allChatMessages", JSON.stringify(messages));
     }
   }, [messages]);
 
   // Apply dark mode to document
   useEffect(() => {
     if (darkMode) {
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
   }, [darkMode]);
 
@@ -346,80 +600,172 @@ export default function Index() {
     const handleClickOutside = (event: MouseEvent) => {
       if (showDotMenu) {
         const target = event.target as HTMLElement;
-        if (!target.closest('.dot-menu-container')) {
+        if (!target.closest(".dot-menu-container")) {
           setShowDotMenu(false);
         }
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showDotMenu]);
 
-  // Enhanced voice recording with auto-search
+  // Enhanced voice recording with auto-search and improved error handling
   const handleVoiceInput = async () => {
     if (isRecording) {
+      // Stop recording
       setIsRecording(false);
       if (recordingTimer) {
         clearTimeout(recordingTimer);
         setRecordingTimer(null);
       }
       if (voiceRecognition) {
-        voiceRecognition.stop();
+        try {
+          voiceRecognition.stop();
+        } catch (error) {
+          console.warn("Error stopping speech recognition:", error);
+        }
+        setVoiceRecognition(null);
       }
     } else {
-      setIsRecording(true);
+      // Start recording
+      try {
+        // Clean up any existing recognition first
+        if (voiceRecognition) {
+          try {
+            voiceRecognition.stop();
+          } catch (error) {
+            console.warn("Error stopping existing recognition:", error);
+          }
+          setVoiceRecognition(null);
+        }
 
-      // Initialize speech recognition
-      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+        // Check if speech recognition is supported
+        if (
+          !("webkitSpeechRecognition" in window) &&
+          !("SpeechRecognition" in window)
+        ) {
+          alert("Speech recognition not supported in this browser");
+          return;
+        }
+
+        // Request microphone permission first
+        try {
+          await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch (permissionError) {
+          alert("Microphone permission is required for voice input");
+          return;
+        }
+
+        setIsRecording(true);
+
+        const SpeechRecognition =
+          (window as any).webkitSpeechRecognition ||
+          (window as any).SpeechRecognition;
         const recognition = new SpeechRecognition();
 
-        recognition.continuous = true;
+        // Configure recognition
+        recognition.continuous = false; // Change to false for better stability
         recognition.interimResults = true;
-        recognition.lang = 'en-US';
+        recognition.lang = "en-US";
+        recognition.maxAlternatives = 1;
+
+        let finalTranscript = "";
+        let interimTranscript = "";
+
+        recognition.onstart = () => {
+          console.log("Speech recognition started");
+        };
 
         recognition.onresult = (event: any) => {
-          let finalTranscript = '';
+          interimTranscript = "";
+          finalTranscript = "";
+
           for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
-              finalTranscript += event.results[i][0].transcript;
+              finalTranscript += transcript;
+            } else {
+              interimTranscript += transcript;
             }
           }
 
-          if (finalTranscript) {
-            setInputValue(finalTranscript);
+          // Update input with interim or final results
+          setInputValue(finalTranscript + interimTranscript);
+        };
 
-            // Clear existing timer
-            if (recordingTimer) {
-              clearTimeout(recordingTimer);
-            }
+        recognition.onend = () => {
+          console.log("Speech recognition ended");
+          setIsRecording(false);
+          setVoiceRecognition(null);
 
-            // Set 4-second timer for auto-search
-            const timer = setTimeout(() => {
-              setIsRecording(false);
-              recognition.stop();
-              if (finalTranscript.trim()) {
-                handleQuestionSubmit(finalTranscript);
-              }
-            }, 4000);
-
-            setRecordingTimer(timer);
+          // If we have a final transcript, process it
+          if (finalTranscript.trim()) {
+            handleQuestionSubmit(finalTranscript.trim());
+            setInputValue("");
           }
         };
 
         recognition.onerror = (event: any) => {
-          console.error('Speech recognition error:', event.error);
+          console.error("Speech recognition error:", event.error);
           setIsRecording(false);
+          setVoiceRecognition(null);
+
+          // Clear any timers
+          if (recordingTimer) {
+            clearTimeout(recordingTimer);
+            setRecordingTimer(null);
+          }
+
+          // Handle specific error types
+          switch (event.error) {
+            case "aborted":
+              console.log("Speech recognition was aborted");
+              break;
+            case "audio-capture":
+              alert(
+                "No microphone was found. Please check your microphone settings.",
+              );
+              break;
+            case "not-allowed":
+              alert(
+                "Microphone permission was denied. Please allow microphone access.",
+              );
+              break;
+            case "network":
+              alert("Network error occurred during speech recognition.");
+              break;
+            case "no-speech":
+              console.log("No speech was detected");
+              break;
+            case "service-not-allowed":
+              alert("Speech recognition service is not allowed.");
+              break;
+            default:
+              console.log("Speech recognition error:", event.error);
+          }
         };
 
+        // Set auto-stop timer (10 seconds max)
+        const autoStopTimer = setTimeout(() => {
+          if (recognition && isRecording) {
+            try {
+              recognition.stop();
+            } catch (error) {
+              console.warn("Error auto-stopping recognition:", error);
+            }
+          }
+        }, 10000);
+
+        setRecordingTimer(autoStopTimer);
         recognition.start();
         setVoiceRecognition(recognition);
-      } else {
-        alert('Speech recognition not supported in this browser');
+      } catch (error) {
+        console.error("Error starting speech recognition:", error);
         setIsRecording(false);
+        alert("Failed to start speech recognition. Please try again.");
       }
     }
   };
@@ -431,22 +777,25 @@ export default function Index() {
     const VOICE_ID = "your_voice_id_here";
 
     try {
-      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'audio/mpeg',
-          'Content-Type': 'application/json',
-          'xi-api-key': ELEVENLABS_API_KEY
+      const response = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "audio/mpeg",
+            "Content-Type": "application/json",
+            "xi-api-key": ELEVENLABS_API_KEY,
+          },
+          body: JSON.stringify({
+            text: text,
+            model_id: "eleven_monolingual_v1",
+            voice_settings: {
+              stability: 0.5,
+              similarity_boost: 0.5,
+            },
+          }),
         },
-        body: JSON.stringify({
-          text: text,
-          model_id: "eleven_monolingual_v1",
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.5
-          }
-        })
-      });
+      );
 
       if (response.ok) {
         const audioBlob = await response.blob();
@@ -455,7 +804,7 @@ export default function Index() {
         audio.play();
       }
     } catch (error) {
-      console.error('ElevenLabs TTS error:', error);
+      console.error("ElevenLabs TTS error:", error);
     }
   };
 
@@ -472,85 +821,81 @@ export default function Index() {
 
     // Extract markdown images and collect URLs
     const markdownImageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
-    const markdownImages = Array.from(processedText.matchAll(markdownImageRegex));
-    markdownImages.forEach(match => {
+    const markdownImages = Array.from(
+      processedText.matchAll(markdownImageRegex),
+    );
+    markdownImages.forEach((match) => {
       images.push(match[2]); // URL from markdown
-      processedText = processedText.replace(match[0], ''); // Remove markdown syntax
+      processedText = processedText.replace(match[0], ""); // Remove markdown syntax
     });
 
     // Extract regular image URLs
     const regularImageUrls = detectImageUrls(processedText);
     images.push(...regularImageUrls);
 
+    // Fix malformed HTML tags
+    processedText = processedText.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+
+    // Fix malformed list items like <li><li> to proper <li>
+    processedText = processedText.replace(/<li><li>/g, "<li>");
+    processedText = processedText.replace(/<\/li><\/li>/g, "</li>");
+
     // Handle HTML lists first
     let formattedContent: JSX.Element[] = [];
 
     // Check if text contains HTML list tags
-    if (processedText.includes('<ul>') || processedText.includes('<ol>')) {
+    if (
+      processedText.includes("<ul>") ||
+      processedText.includes("<ol>") ||
+      processedText.includes("<li>")
+    ) {
       // Split by HTML list blocks
       const parts = processedText.split(/(<\/?(?:ul|ol|li)[^>]*>)/gi);
       let currentList: JSX.Element[] = [];
       let isInList = false;
-      let listType = '';
+      let listType = "";
       let listIndex = 0;
 
       parts.forEach((part, index) => {
-        if (part.toLowerCase().includes('<ul')) {
+        if (part.toLowerCase().includes("<ul")) {
           isInList = true;
-          listType = 'ul';
-        } else if (part.toLowerCase().includes('<ol')) {
+          listType = "ul";
+        } else if (part.toLowerCase().includes("<ol")) {
           isInList = true;
-          listType = 'ol';
-        } else if (part.toLowerCase().includes('</ul>') || part.toLowerCase().includes('</ol>')) {
+          listType = "ol";
+        } else if (
+          part.toLowerCase().includes("</ul>") ||
+          part.toLowerCase().includes("</ol>")
+        ) {
           if (currentList.length > 0) {
             formattedContent.push(
               <div key={`list-${listIndex++}`} className="mb-4">
-                {listType === 'ul' ? (
-                  <ul className="list-none space-y-2">
-                    {currentList}
-                  </ul>
+                {listType === "ul" ? (
+                  <ul className="list-none space-y-2">{currentList}</ul>
                 ) : (
-                  <ol className="list-none space-y-2">
-                    {currentList}
-                  </ol>
+                  <ol className="list-none space-y-2">{currentList}</ol>
                 )}
-              </div>
+              </div>,
             );
             currentList = [];
           }
           isInList = false;
-          listType = '';
-        } else if (part.toLowerCase().includes('<li>')) {
+          listType = "";
+        } else if (part.toLowerCase().includes("<li>")) {
           // Skip the opening li tag
-        } else if (part.toLowerCase().includes('</li>')) {
+        } else if (part.toLowerCase().includes("</li>")) {
           // Skip the closing li tag
         } else if (isInList && part.trim()) {
           // Process list item content
-          const processedLine = part.split(/(\*\*[^*]+\*\*)/).map((segment, segIndex) => {
-            if (segment.startsWith('**') && segment.endsWith('**')) {
-              return (
-                <strong key={segIndex} className={`font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                  {segment.slice(2, -2)}
-                </strong>
-              );
-            }
-            return segment;
-          });
-
-          currentList.push(
-            <li key={`item-${index}`} className={`flex items-start ${darkMode ? 'text-gray-100' : 'text-gray-700'}`}>
-              <span className="text-blue-600 mr-2 mt-1 flex-shrink-0">•</span>
-              <span>{processedLine}</span>
-            </li>
-          );
-        } else if (!isInList && part.trim()) {
-          // Regular text outside of lists
-          const lines = part.split(/\\n|\n/).filter(line => line.trim());
-          lines.forEach((line, lineIndex) => {
-            const processedLine = line.split(/(\*\*[^*]+\*\*)/).map((segment, segIndex) => {
-              if (segment.startsWith('**') && segment.endsWith('**')) {
+          const processedLine = part
+            .split(/(\*\*[^*]+\*\*)/)
+            .map((segment, segIndex) => {
+              if (segment.startsWith("**") && segment.endsWith("**")) {
                 return (
-                  <strong key={segIndex} className={`font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <strong
+                    key={segIndex}
+                    className={`font-bold ${darkMode ? "text-white" : "text-gray-900"}`}
+                  >
                     {segment.slice(2, -2)}
                   </strong>
                 );
@@ -558,26 +903,96 @@ export default function Index() {
               return segment;
             });
 
+          currentList.push(
+            <li
+              key={`item-${index}`}
+              className={`flex items-start ${darkMode ? "text-gray-100" : "text-gray-700"}`}
+            >
+              <span className="text-blue-600 mr-2 mt-1 flex-shrink-0">•</span>
+              <span>{processedLine}</span>
+            </li>,
+          );
+        } else if (!isInList && part.trim()) {
+          // Regular text outside of lists
+          const lines = part.split(/\\n|\n/).filter((line) => line.trim());
+          lines.forEach((line, lineIndex) => {
+            const processedLine = line
+              .split(/(\*\*[^*]+\*\*)/)
+              .map((segment, segIndex) => {
+                if (segment.startsWith("**") && segment.endsWith("**")) {
+                  return (
+                    <strong
+                      key={segIndex}
+                      className={`font-bold ${darkMode ? "text-white" : "text-gray-900"}`}
+                    >
+                      {segment.slice(2, -2)}
+                    </strong>
+                  );
+                }
+                return segment;
+              });
+
             formattedContent.push(
-              <div key={`text-${index}-${lineIndex}`} className={`mb-2 ${darkMode ? 'text-gray-100' : 'text-gray-700'}`}>
+              <div
+                key={`text-${index}-${lineIndex}`}
+                className={`mb-2 ${darkMode ? "text-gray-100" : "text-gray-700"}`}
+              >
                 {processedLine}
-              </div>
+              </div>,
             );
           });
         }
       });
     } else {
       // No HTML lists, process as before
-      const lines = processedText.split(/\\n|\n/).filter(line => line.trim());
+      const lines = processedText.split(/\\n|\n/).filter((line) => line.trim());
 
       lines.forEach((line, index) => {
         // Handle list items
-        if (line.trim().startsWith('•') || line.trim().startsWith('-') || line.trim().match(/^\d+\./)) {
-          const listContent = line.replace(/^[•\-\d\.]\s*/, '');
-          const processedLine = listContent.split(/(\*\*[^*]+\*\*)/).map((segment, segIndex) => {
-            if (segment.startsWith('**') && segment.endsWith('**')) {
+        if (
+          line.trim().startsWith("•") ||
+          line.trim().startsWith("-") ||
+          line.trim().match(/^\d+\./)
+        ) {
+          const listContent = line.replace(/^[•\-\d\.]\s*/, "");
+          const processedLine = listContent
+            .split(/(\*\*[^*]+\*\*)/)
+            .map((segment, segIndex) => {
+              if (segment.startsWith("**") && segment.endsWith("**")) {
+                return (
+                  <strong
+                    key={segIndex}
+                    className={`font-bold ${darkMode ? "text-white" : "text-gray-900"}`}
+                  >
+                    {segment.slice(2, -2)}
+                  </strong>
+                );
+              }
+              return segment;
+            });
+
+          formattedContent.push(
+            <div
+              key={index}
+              className={`mb-2 ${darkMode ? "text-gray-100" : "text-gray-700"} ml-4 flex items-start`}
+            >
+              <span className="text-blue-600 mr-2 mt-1">•</span>
+              <span>{processedLine}</span>
+            </div>,
+          );
+          return;
+        }
+
+        // Handle bold text wrapped in **
+        const processedLine = line
+          .split(/(\*\*[^*]+\*\*)/)
+          .map((segment, segIndex) => {
+            if (segment.startsWith("**") && segment.endsWith("**")) {
               return (
-                <strong key={segIndex} className={`font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                <strong
+                  key={segIndex}
+                  className={`font-bold ${darkMode ? "text-white" : "text-gray-900"}`}
+                >
                   {segment.slice(2, -2)}
                 </strong>
               );
@@ -585,43 +1000,29 @@ export default function Index() {
             return segment;
           });
 
-          formattedContent.push(
-            <div key={index} className={`mb-2 ${darkMode ? 'text-gray-100' : 'text-gray-700'} ml-4 flex items-start`}>
-              <span className="text-blue-600 mr-2 mt-1">•</span>
-              <span>{processedLine}</span>
-            </div>
-          );
-          return;
-        }
-
-        // Handle bold text wrapped in **
-        const processedLine = line.split(/(\*\*[^*]+\*\*)/).map((segment, segIndex) => {
-          if (segment.startsWith('**') && segment.endsWith('**')) {
-            return (
-              <strong key={segIndex} className={`font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                {segment.slice(2, -2)}
-              </strong>
-            );
-          }
-          return segment;
-        });
-
         formattedContent.push(
-          <div key={index} className={`mb-2 ${darkMode ? 'text-gray-100' : 'text-gray-700'}`}>
+          <div
+            key={index}
+            className={`mb-2 ${darkMode ? "text-gray-100" : "text-gray-700"}`}
+          >
             {processedLine}
-          </div>
+          </div>,
         );
       });
     }
 
     return {
       formattedText: formattedContent,
-      images: images
+      images: images,
     };
   };
 
   // Related Content Carousel Component
-  const RelatedContentCarousel = ({ content }: { content: RelatedContent[] }) => {
+  const RelatedContentCarousel = ({
+    content,
+  }: {
+    content: RelatedContent[];
+  }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
 
     if (content.length === 0) return null;
@@ -632,15 +1033,20 @@ export default function Index() {
             href={content[0].url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`block ${darkMode ? 'border-gray-600' : 'border-gray-200'} border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:scale-[1.03]`}
+            className={`block ${darkMode ? "border-gray-600" : "border-gray-200"} border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:scale-[1.03]`}
           >
             <img
-              src={content[0].image}
+              src={
+                content[0].image ||
+                "https://hutechsolutions.com/wp-content/uploads/2024/08/hutech-logo-1.svg"
+              }
               alt={content[0].title}
-              className="w-full h-48 object-cover"
+              className="w-full h-32 object-cover bg-gray-100 p-2"
             />
             <div className="p-4 bg-transparent">
-              <h5 className={`font-medium text-sm hover:text-blue-600 cursor-pointer ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+              <h5
+                className={`font-medium text-sm hover:text-blue-600 cursor-pointer ${darkMode ? "text-white" : "text-gray-800"}`}
+              >
                 {content[0].title}
               </h5>
             </div>
@@ -665,13 +1071,16 @@ export default function Index() {
           href={currentContent.url}
           target="_blank"
           rel="noopener noreferrer"
-          className={`block ${darkMode ? 'border-gray-600' : 'border-gray-200'} border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300`}
+          className={`block ${darkMode ? "border-gray-600" : "border-gray-200"} border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300`}
         >
           <div className="relative">
             <img
-              src={currentContent.image}
+              src={
+                currentContent.image ||
+                "https://hutechsolutions.com/wp-content/uploads/2024/08/hutech-logo-1.svg"
+              }
               alt={currentContent.title}
-              className="w-full h-48 object-cover"
+              className="w-full h-32 object-cover bg-gray-100 p-2"
             />
 
             {/* Navigation Arrows */}
@@ -702,7 +1111,9 @@ export default function Index() {
           </div>
 
           <div className="p-4 bg-transparent">
-            <h5 className={`font-medium text-sm hover:text-blue-600 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+            <h5
+              className={`font-medium text-sm hover:text-blue-600 ${darkMode ? "text-white" : "text-gray-800"}`}
+            >
               {currentContent.title}
             </h5>
           </div>
@@ -722,7 +1133,8 @@ export default function Index() {
           <img
             src={images[0]}
             alt="Response image"
-            className="w-full h-64 object-cover rounded-lg border border-gray-200 shadow-sm"
+            className="w-full h-auto max-h-[500px] object-contain rounded-lg border border-gray-200 shadow-sm"
+            style={{ aspectRatio: "auto" }}
           />
         </div>
       );
@@ -742,7 +1154,8 @@ export default function Index() {
           <img
             src={images[currentIndex]}
             alt={`Response image ${currentIndex + 1}`}
-            className="w-full h-64 object-cover transition-all duration-300"
+            className="w-full h-auto max-h-[500px] object-contain transition-all duration-300"
+            style={{ aspectRatio: "auto" }}
           />
 
           {/* Navigation Arrows */}
@@ -773,7 +1186,9 @@ export default function Index() {
               key={index}
               onClick={() => setCurrentIndex(index)}
               className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                index === currentIndex ? 'border-blue-500 scale-110' : 'border-gray-300 hover:border-gray-400'
+                index === currentIndex
+                  ? "border-blue-500 scale-110"
+                  : "border-gray-300 hover:border-gray-400"
               }`}
             >
               <img
@@ -789,25 +1204,27 @@ export default function Index() {
   };
 
   const formatAnswer = (answer: string) => {
-    return answer.split('\n').map((line, index) => {
-      if (line.startsWith('• **') && line.includes(':**')) {
-        const parts = line.split(':**');
+    return answer.split("\n").map((line, index) => {
+      if (line.startsWith("• **") && line.includes(":**")) {
+        const parts = line.split(":**");
         return (
           <div key={index} className="mb-2">
-            <span className="font-semibold text-blue-600">{parts[0].replace('• **', '')}:</span>
+            <span className="font-semibold text-blue-600">
+              {parts[0].replace("• **", "")}:
+            </span>
             <span className="ml-2">{parts[1]}</span>
           </div>
         );
-      } else if (line.startsWith('**') && line.endsWith(':**')) {
+      } else if (line.startsWith("**") && line.endsWith(":**")) {
         return (
           <div key={index} className="font-bold text-gray-800 mt-4 mb-2">
-            {line.replace(/\*\*/g, '')}
+            {line.replace(/\*\*/g, "")}
           </div>
         );
-      } else if (line.startsWith('• ')) {
+      } else if (line.startsWith("• ")) {
         return (
           <div key={index} className="ml-4 mb-1 text-gray-700">
-            {line.replace('• ', '• ')}
+            {line.replace("• ", "• ")}
           </div>
         );
       } else if (line.trim()) {
@@ -823,36 +1240,60 @@ export default function Index() {
 
   if (isConversationMode) {
     return (
-      <div className={`h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} flex flex-col`}>
+      <div
+        className={`h-screen ${darkMode ? "bg-gray-900" : "bg-gray-50"} flex flex-col overflow-hidden`}
+      >
         {/* Professional Navigation Bar */}
-        <header className={`${darkMode ? 'bg-gray-900' : 'bg-gradient-to-r from-blue-800 to-blue-900'} shadow-lg flex-shrink-0`}>
+        <header className="bg-white shadow-lg flex-shrink-0 border-b border-gray-200">
           <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               {/* Logo Section */}
               <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <h1 className="text-2xl font-bold text-white">
-                    <span className="text-blue-300">AI</span> Assistant
-                  </h1>
+                <div className="flex items-center gap-4">
+                  <img
+                    src="https://hutechsolutions.com/wp-content/uploads/2024/08/hutech-logo-1.svg"
+                    alt="Hutech Solutions"
+                    className="h-10 w-auto"
+                  />
+                  <img
+                    src="https://hutechsolutions.com/wp-content/uploads/2024/08/cmmi-level3-logo.svg"
+                    alt="CMMI Level 3"
+                    className="h-8 w-auto"
+                  />
                 </div>
               </div>
 
               {/* Navigation Items */}
               <div className="hidden md:block">
                 <div className="ml-10 flex items-baseline space-x-8">
-                  <a href="#" className="text-blue-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                  <a
+                    href="#"
+                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                  >
                     Home
                   </a>
-                  <a href="#" className="text-blue-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                  <a
+                    href="#"
+                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                  >
                     Features
                   </a>
-                  <a href="#" className="text-blue-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                  <a
+                    href="#"
+                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                  >
                     Services
                   </a>
-                  <a href="#" className="text-blue-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                  <a
+                    href="#"
+                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                  >
                     About
                   </a>
-                  <a href="#" className="text-blue-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                  <a
+                    href="#"
+                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                  >
                     Contact
                   </a>
                 </div>
@@ -860,90 +1301,158 @@ export default function Index() {
 
               {/* Right Side Items */}
               <div className="flex items-center space-x-4">
-                {/* New Chat Button */}
-                <button
-                  onClick={() => {
-                    setIsConversationMode(false);
-                    setMessages([]);
-                    setRecommendations([]);
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 transform hover:scale-105 shadow-md"
-                >
-                  New Chat
-                </button>
-
                 {/* Chat Bot Button */}
                 <button
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 transform hover:scale-105 shadow-md"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center gap-2"
                   title="Chat Assistant Active"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                    <path d="M13 8H7"/>
-                    <path d="M17 12H7"/>
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    <path d="M13 8H7" />
+                    <path d="M17 12H7" />
                   </svg>
-                  <span className="hidden sm:inline text-sm font-medium">Active</span>
+                  <span className="hidden sm:inline text-sm font-medium">
+                    Chat
+                  </span>
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 </button>
-
-                {/* User Avatar */}
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center border-2 border-blue-300">
-                  <User size={16} className="text-white" />
-                </div>
-
-                {/* Settings */}
-                <button className="text-blue-100 hover:text-white p-1 transition-colors duration-200">
-                  <Settings size={20} />
-                </button>
-
-                {/* Mobile Menu Button */}
-                <div className="md:hidden">
-                  <button className="text-blue-100 hover:text-white p-2">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <line x1="3" y1="6" x2="21" y2="6"/>
-                      <line x1="3" y1="12" x2="21" y2="12"/>
-                      <line x1="3" y1="18" x2="21" y2="18"/>
-                    </svg>
-                  </button>
-                </div>
               </div>
             </div>
           </nav>
         </header>
 
         {/* Chat Messages - Scrollable Area */}
-        <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+        <div
+          ref={chatContainerRef}
+          className="flex-1 overflow-y-auto px-6 py-6 space-y-6 relative scroll-smooth"
+          style={{ scrollBehavior: "smooth" }}
+        >
+          {/* Modern Voice Animation Overlay */}
+          {isRecording && (
+            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="bg-gradient-to-br from-orange-500 via-blue-500 to-orange-600 rounded-3xl p-8 shadow-2xl">
+                <div className="flex flex-col items-center gap-6">
+                  <div className="relative">
+                    {/* Animated mic icon */}
+                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center animate-voicePulse">
+                      <Mic size={40} className="text-blue-600" />
+                    </div>
+                    {/* Ripple effect */}
+                    <div className="absolute inset-0 rounded-full border-4 border-white/30 animate-ping"></div>
+                    <div
+                      className="absolute -inset-2 rounded-full border-2 border-white/20 animate-ping"
+                      style={{ animationDelay: "0.5s" }}
+                    ></div>
+                    <div
+                      className="absolute -inset-4 rounded-full border border-white/10 animate-ping"
+                      style={{ animationDelay: "1s" }}
+                    ></div>
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-white text-xl font-semibold mb-2">
+                      Listening...
+                    </h3>
+                    <p className="text-white/80 text-sm">
+                      Speak clearly and I'll understand
+                    </p>
+                  </div>
+                  {/* Sound waves animation */}
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-1 bg-white/60 rounded-full animate-pulse"
+                        style={{
+                          height: `${Math.random() * 30 + 10}px`,
+                          animationDelay: `${i * 0.1}s`,
+                          animationDuration: "0.8s",
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setIsRecording(false)}
+                    className="mt-4 px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full transition-all duration-200 backdrop-blur-sm border border-white/20"
+                  >
+                    Stop Listening
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           {messages.map((message, index) => (
             <div
               key={message.id}
-              className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-center'} animate-fadeInUp`}
+              className={`flex ${message.type === "user" ? "justify-end" : "justify-start"} animate-fadeInUp mb-4`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className={`${message.type === 'user' ? `max-w-md ${darkMode ? 'bg-gray-800 border-gray-600 text-gray-100' : 'bg-white border-gray-200'} text-sm` : `max-w-xl ${darkMode ? 'bg-gray-800 border-gray-600 text-gray-100' : 'bg-white border-gray-200'} text-sm`} rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-[1.02]`}>
-                {message.type === 'user' ? (
-                  <p>{message.content}</p>
+              <div
+                className={`${message.type === "user" ? "max-w-xs ml-auto" : "max-w-4xl mr-auto"} ${message.type === "user" ? "bg-gray-200 text-gray-800 rounded-2xl rounded-br-md p-4" : "bg-transparent text-gray-900 p-2"}`}
+              >
+                {message.type === "user" ? (
+                  <p className="text-sm">{message.content}</p>
                 ) : (
                   <div>
-                    <div className="prose max-w-none">
+                    <div className="max-w-none">
                       {(() => {
                         // Show typing animation if this message is currently being typed
                         if (typingMessageId === message.id && displayedText) {
-                          const formatted = formatAnswerText(displayedText, darkMode);
                           return (
-                            <div>
-                              {formatted.formattedText}
-                              <span className="animate-pulse text-blue-500">|</span>
+                            <div className="prose-sm text-gray-900">
+                              <div className="whitespace-pre-wrap">
+                                {displayedText}
+                              </div>
+                              <span className="animate-pulse text-blue-500">
+                                |
+                              </span>
                             </div>
                           );
                         }
 
                         // Show complete message
-                        const formatted = formatAnswerText(message.response?.answer || '', darkMode);
+                        const answer = message.response?.answer || "";
+                        const formatted = formatAnswerText(answer, darkMode);
                         return (
                           <div>
-                            {formatted.formattedText}
-                            {/* Show images only after typing is complete or if not currently typing */}
-                            {(showImages[message.id] || (typingMessageId !== message.id && typingMessageId !== null) || typingMessageId === null) && (
-                              <ImageCarousel images={formatted.images} />
+                            <div className="prose-sm text-gray-900 leading-relaxed">
+                              {formatted.formattedText}
+                            </div>
+                            {/* Display extracted images from answer */}
+                            {formatted.images.length > 0 && (
+                              <div className="mt-4 space-y-3">
+                                {formatted.images.map((imgUrl, idx) => (
+                                  <div key={idx} className="relative">
+                                    <img
+                                      src={imgUrl}
+                                      alt={`Answer image ${idx + 1}`}
+                                      className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-200 shadow-sm"
+                                    />
+                                    <div className="absolute inset-0 bg-black bg-opacity-20 rounded-lg pointer-events-none"></div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {/* Show Hutech logo when no images are present */}
+                            {(!message.response?.related_content ||
+                              message.response.related_content.length ===
+                                0) && (
+                              <div className="mt-4 flex items-center gap-2 opacity-70">
+                                <img
+                                  src="https://hutechsolutions.com/wp-content/uploads/2024/08/hutech-logo-1.svg"
+                                  alt="Hutech Solutions"
+                                  className="h-6 w-auto"
+                                />
+                                <span className="text-xs text-gray-500">
+                                  Powered by Hutech AI
+                                </span>
+                              </div>
                             )}
                           </div>
                         );
@@ -951,64 +1460,232 @@ export default function Index() {
                     </div>
 
                     {/* Show related content only after typing is complete */}
-                    {(showImages[message.id] || (typingMessageId !== message.id && typingMessageId !== null) || typingMessageId === null) &&
-                     message.response?.related_content &&
-                     message.response.related_content.length > 0 && (
-                      <RelatedContentCarousel content={message.response.related_content} />
-                    )}
+                    {(showImages[message.id] ||
+                      (typingMessageId !== message.id &&
+                        typingMessageId !== null) ||
+                      typingMessageId === null) &&
+                      message.response?.related_content &&
+                      message.response.related_content.length > 0 && (
+                        <RelatedContentCarousel
+                          content={message.response.related_content}
+                        />
+                      )}
+
+                    {/* File download links when file_links are present */}
+                    {(showImages[message.id] ||
+                      (typingMessageId !== message.id &&
+                        typingMessageId !== null) ||
+                      typingMessageId === null) &&
+                      message.response?.file_links &&
+                      message.response.file_links.length > 0 && (
+                        <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                          <h6 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            >
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                              <polyline points="14,2 14,8 20,8" />
+                              <line x1="16" y1="13" x2="8" y2="13" />
+                              <line x1="16" y1="17" x2="8" y2="17" />
+                              <polyline points="10,9 9,9 8,9" />
+                            </svg>
+                            Available Files
+                          </h6>
+                          <div className="space-y-2">
+                            {message.response.file_links.map((link, index) => (
+                              <a
+                                key={index}
+                                href={link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 p-2 bg-white rounded border hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 group"
+                              >
+                                <svg
+                                  width="14"
+                                  height="14"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  className="text-blue-600"
+                                >
+                                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                  <polyline points="7,10 12,15 17,10" />
+                                  <line x1="12" y1="15" x2="12" y2="3" />
+                                </svg>
+                                <span className="text-sm text-gray-700 group-hover:text-blue-600 flex-1">
+                                  {link.split("/").pop() || `File ${index + 1}`}
+                                </span>
+                                <span className="text-xs text-gray-500 group-hover:text-blue-500">
+                                  Download
+                                </span>
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                   </div>
                 )}
               </div>
             </div>
           ))}
 
-
           {isLoading && !isTyping && (
-            <div className="flex justify-center animate-fadeInUp">
-              <div className="bg-gradient-to-r from-white to-blue-50 border border-blue-200 rounded-2xl p-6 shadow-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full animate-bounce"></div>
-                  <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-3 h-3 bg-gradient-to-r from-pink-500 to-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  <span className="text-gray-700 ml-2 font-medium">AI is thinking...</span>
+            <div className="flex justify-start animate-fadeInUp mb-4">
+              <div className="max-w-4xl mr-auto bg-transparent p-2">
+                <div className="relative">
+                  {/* Modern thinking container */}
+                  <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border border-blue-200/50 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
+                    <div className="flex items-center gap-4">
+                      {/* Animated AI avatar */}
+                      <div className="relative">
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                          <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            className="text-white"
+                          >
+                            <path
+                              d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"
+                              fill="currentColor"
+                            />
+                          </svg>
+                        </div>
+                        {/* Pulsing ring */}
+                        <div className="absolute inset-0 rounded-full border-2 border-blue-400/30 animate-ping"></div>
+                        <div
+                          className="absolute -inset-1 rounded-full border border-indigo-300/20 animate-ping"
+                          style={{ animationDelay: "0.5s" }}
+                        ></div>
+                      </div>
+
+                      {/* Thinking dots with modern animation */}
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <div className="flex gap-1">
+                            <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full animate-pulse"></div>
+                            <div
+                              className="w-2 h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-pulse"
+                              style={{ animationDelay: "0.2s" }}
+                            ></div>
+                            <div
+                              className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"
+                              style={{ animationDelay: "0.4s" }}
+                            ></div>
+                          </div>
+                          <span className="text-gray-700 font-medium text-sm">
+                            AI is thinking
+                          </span>
+                        </div>
+
+                        {/* Animated progress bar */}
+                        <div className="w-32 h-1 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full animate-pulse"
+                            style={{
+                              width: "60%",
+                              animation:
+                                "thinking-progress 2s ease-in-out infinite",
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Floating particles effect */}
+                    <div className="absolute top-2 right-4">
+                      <div
+                        className="w-1 h-1 bg-blue-400/40 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.1s" }}
+                      ></div>
+                    </div>
+                    <div className="absolute top-4 right-2">
+                      <div
+                        className="w-1 h-1 bg-indigo-400/40 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.3s" }}
+                      ></div>
+                    </div>
+                    <div className="absolute bottom-3 right-6">
+                      <div
+                        className="w-1 h-1 bg-purple-400/40 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.5s" }}
+                      ></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           )}
 
           {/* Auto-scroll anchor */}
-          <div ref={messagesEndRef} />
+          <div ref={messagesEndRef} className="h-4" />
         </div>
 
         {/* Recommendations Bar - Above Input */}
-        {recommendations.length > 0 && (
-          <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t px-6 py-2 flex-shrink-0`}>
-            <div className="max-w-4xl mx-auto">
-              <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                {recommendations.map((rec, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleQuestionSubmit(rec)}
-                    className={`flex-shrink-0 px-3 py-1.5 ${darkMode ? 'bg-blue-900 hover:bg-blue-800 text-blue-200 border-blue-700' : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'} rounded-full text-xs transition-all duration-200 transform hover:scale-105 border`}
-                  >
-                    {rec.length > 30 ? rec.substring(0, 30) + '...' : rec}
-                  </button>
-                ))}
-              </div>
+        <div
+          className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border-t px-6 py-3 flex-shrink-0 shadow-sm`}
+        >
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-2">
+              <h3
+                className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"}`}
+              >
+                Recommended questions:
+              </h3>
+            </div>
+            <div
+              className="flex gap-2 overflow-x-auto scrollbar-hide pb-1"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              {(recommendations.length > 0
+                ? recommendations
+                : [
+                    "What services do we provide?",
+                    "Where are our offices?",
+                    "What is our tech stack?",
+                    "What certifications do we have?",
+                  ]
+              ).map((rec, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleQuestionSubmit(rec)}
+                  className={`flex-shrink-0 px-4 py-2 ${darkMode ? "bg-blue-900 hover:bg-blue-800 text-blue-200 border-blue-700" : "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"} rounded-full text-sm transition-all duration-200 transform hover:scale-105 border shadow-sm hover:shadow-md`}
+                >
+                  {rec.length > 40 ? rec.substring(0, 40) + "..." : rec}
+                </button>
+              ))}
             </div>
           </div>
-        )}
+        </div>
 
         {/* Confirmation Popup */}
         {showClearConfirm && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 max-w-sm mx-4 shadow-xl`}>
-              <h3 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-800'} mb-2`}>Clear Chat History</h3>
-              <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`}>Are you sure you want to clear all messages? This action cannot be undone.</p>
+            <div
+              className={`${darkMode ? "bg-gray-800" : "bg-white"} rounded-2xl p-6 max-w-sm mx-4 shadow-xl`}
+            >
+              <h3
+                className={`text-lg font-semibold ${darkMode ? "text-white" : "text-gray-800"} mb-2`}
+              >
+                Clear Chat History
+              </h3>
+              <p
+                className={`${darkMode ? "text-gray-300" : "text-gray-600"} mb-4`}
+              >
+                Are you sure you want to clear all messages? This action cannot
+                be undone.
+              </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowClearConfirm(false)}
-                  className={`flex-1 px-4 py-2 ${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} rounded-lg transition-colors`}
+                  className={`flex-1 px-4 py-2 ${darkMode ? "bg-gray-700 text-gray-300 hover:bg-gray-600" : "bg-gray-100 text-gray-700 hover:bg-gray-200"} rounded-lg transition-colors`}
                 >
                   Cancel
                 </button>
@@ -1034,7 +1711,9 @@ export default function Index() {
         />
 
         {/* Sticky Input Bar */}
-        <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t px-6 py-4 flex-shrink-0`}>
+        <div
+          className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border-t px-6 py-4 flex-shrink-0 fixed bottom-0 left-0 right-0 z-50 backdrop-blur-sm bg-opacity-95`}
+        >
           <div className="max-w-4xl mx-auto relative">
             {/* File Upload Inputs (Hidden) */}
             <input
@@ -1058,10 +1737,17 @@ export default function Index() {
             {uploadedFiles.length > 0 && (
               <div className="mb-3 flex flex-wrap gap-2">
                 {uploadedFiles.map((file, index) => (
-                  <div key={index} className="bg-blue-100 px-3 py-1 rounded-full text-sm text-blue-700 flex items-center gap-2">
+                  <div
+                    key={index}
+                    className="bg-blue-100 px-3 py-1 rounded-full text-sm text-blue-700 flex items-center gap-2"
+                  >
                     <span>{file.name}</span>
                     <button
-                      onClick={() => setUploadedFiles(prev => prev.filter((_, i) => i !== index))}
+                      onClick={() =>
+                        setUploadedFiles((prev) =>
+                          prev.filter((_, i) => i !== index),
+                        )
+                      }
                       className="text-blue-500 hover:text-blue-700"
                     >
                       ×
@@ -1071,48 +1757,60 @@ export default function Index() {
               </div>
             )}
 
-            {/* Dot Menu */}
+            {/* Simplified Dot Menu */}
             {showDotMenu && (
-              <div className={`dot-menu-container absolute bottom-20 left-6 ${darkMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-200'} rounded-xl shadow-lg p-2 z-10`}>
+              <div
+                className={`dot-menu-container absolute bottom-20 right-6 ${darkMode ? "bg-gray-800 border-gray-600 shadow-2xl" : "bg-white border-gray-200 shadow-2xl"} rounded-2xl p-3 z-10 backdrop-blur-lg border`}
+              >
+                <button
+                  onClick={() => {
+                    setIsConversationMode(false);
+                    setRecommendations([]);
+                    setShowDotMenu(false);
+                  }}
+                  className={`w-full text-left px-4 py-3 text-sm ${darkMode ? "text-blue-400 hover:bg-gray-700" : "text-blue-600 hover:bg-blue-50"} rounded-xl flex items-center gap-3 transition-all duration-200 hover:scale-105`}
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                  New Chat
+                </button>
                 <button
                   onClick={() => setShowClearConfirm(true)}
-                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2"
+                  className={`w-full text-left px-4 py-3 text-sm ${darkMode ? "text-red-400 hover:bg-gray-700" : "text-red-600 hover:bg-red-50"} rounded-xl flex items-center gap-3 transition-all duration-200 hover:scale-105`}
                 >
                   <Trash2 size={16} />
-                  Clear chat
+                  Clear Chat
                 </button>
                 <button
                   onClick={downloadChatAsPDF}
-                  className="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50 rounded-lg flex items-center gap-2"
+                  className={`w-full text-left px-4 py-3 text-sm ${darkMode ? "text-green-400 hover:bg-gray-700" : "text-green-600 hover:bg-green-50"} rounded-xl flex items-center gap-3 transition-all duration-200 hover:scale-105`}
                 >
                   <Download size={16} />
                   Download PDF
                 </button>
-                <button
-                  onClick={handleImageUpload}
-                  className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-2"
-                >
-                  <Image size={16} />
-                  Upload photo
-                </button>
-                <button
-                  onClick={handleFileUpload}
-                  className="w-full text-left px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg flex items-center gap-2"
-                >
-                  <FileText size={16} />
-                  Upload file
-                </button>
               </div>
             )}
 
-            <div className={`flex items-center gap-3 ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-full p-3 transition-all duration-300 ${isLoading ? 'bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-2 border-blue-300 shadow-lg scale-105' : `${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'} hover:shadow-md`}`}>
+            <div
+              className={`flex items-center gap-3 ${darkMode ? "bg-gray-700" : "bg-gray-100"} rounded-full p-3 transition-all duration-300 ${isLoading ? "bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-2 border-blue-300 shadow-lg scale-105" : `${darkMode ? "hover:bg-gray-600" : "hover:bg-gray-200"} hover:shadow-md`}`}
+            >
               {/* Left side - Voice only */}
               <div className="flex items-center gap-2">
                 {/* Voice button */}
                 <button
                   onClick={handleVoiceInput}
                   className={`p-2 transition-colors duration-200 ${
-                    isRecording ? 'text-red-500 animate-pulse' : `${darkMode ? 'text-gray-400 hover:text-blue-400' : 'text-gray-500 hover:text-blue-600'}`
+                    isRecording
+                      ? "text-blue-600 animate-voicePulse"
+                      : `${darkMode ? "text-gray-400 hover:text-blue-400" : "text-gray-500 hover:text-blue-600"}`
                   }`}
                   title="Voice input"
                 >
@@ -1125,10 +1823,10 @@ export default function Index() {
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleInputSubmit()}
+                onKeyPress={(e) => e.key === "Enter" && handleInputSubmit()}
                 placeholder={isRecording ? "Listening..." : "How can I help?"}
                 disabled={isLoading || isRecording}
-                className={`flex-1 bg-transparent outline-none ${darkMode ? 'text-white placeholder-gray-400' : 'text-gray-800 placeholder-gray-500'} disabled:opacity-50`}
+                className={`flex-1 bg-transparent outline-none ${darkMode ? "text-white placeholder-gray-400" : "text-gray-800 placeholder-gray-500"} disabled:opacity-50`}
               />
 
               {/* Right side controls */}
@@ -1136,17 +1834,31 @@ export default function Index() {
                 {/* Dark mode toggle */}
                 <button
                   onClick={() => setDarkMode(!darkMode)}
-                  className={`p-2 ${darkMode ? 'text-gray-400 hover:text-blue-400' : 'text-gray-500 hover:text-blue-600'} transition-colors duration-200`}
+                  className={`p-2 ${darkMode ? "text-gray-400 hover:text-blue-400" : "text-gray-500 hover:text-blue-600"} transition-colors duration-200`}
                   title="Toggle dark mode"
                 >
                   {darkMode ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="5"/>
-                      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="5" />
+                      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
                     </svg>
                   ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                     </svg>
                   )}
                 </button>
@@ -1154,13 +1866,20 @@ export default function Index() {
                 {/* Dot menu */}
                 <button
                   onClick={() => setShowDotMenu(!showDotMenu)}
-                  className={`p-2 ${darkMode ? 'text-gray-400 hover:text-blue-400' : 'text-gray-500 hover:text-blue-600'} transition-colors duration-200`}
+                  className={`p-2 ${darkMode ? "text-gray-400 hover:text-blue-400" : "text-gray-500 hover:text-blue-600"} transition-colors duration-200`}
                   title="More options"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="1"/>
-                    <circle cx="12" cy="5" r="1"/>
-                    <circle cx="12" cy="19" r="1"/>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <circle cx="12" cy="12" r="1" />
+                    <circle cx="12" cy="5" r="1" />
+                    <circle cx="12" cy="19" r="1" />
                   </svg>
                 </button>
 
@@ -1170,8 +1889,8 @@ export default function Index() {
                   disabled={isLoading || !inputValue.trim() || isRecording}
                   className={`p-2 rounded-full transition-all duration-300 transform ${
                     isLoading || isRecording
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700 hover:scale-105 active:scale-95'
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700 hover:scale-105 active:scale-95"
                   } text-white disabled:opacity-50 disabled:hover:scale-100`}
                 >
                   {isLoading ? (
@@ -1187,9 +1906,13 @@ export default function Index() {
 
         {/* Notification */}
         {notification && (
-          <div className={`fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 ${
-            notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-          }`}>
+          <div
+            className={`fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 ${
+              notification.type === "success"
+                ? "bg-green-500 text-white"
+                : "bg-red-500 text-white"
+            }`}
+          >
             {notification.message}
           </div>
         )}
@@ -1198,36 +1921,60 @@ export default function Index() {
   }
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' : 'bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30'}`}>
+    <div
+      className={`h-screen overflow-hidden ${darkMode ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" : "bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30"}`}
+    >
       {/* Professional Navigation Bar */}
-      <header className={`${darkMode ? 'bg-gray-900' : 'bg-gradient-to-r from-blue-800 to-blue-900'} shadow-lg`}>
+      <header className="bg-white shadow-lg border-b border-gray-200">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo Section */}
             <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <h1 className="text-2xl font-bold text-white">
-                  <span className="text-blue-300">AI</span> Assistant
-                </h1>
+              <div className="flex items-center gap-4">
+                <img
+                  src="https://hutechsolutions.com/wp-content/uploads/2024/08/hutech-logo-1.svg"
+                  alt="Hutech Solutions"
+                  className="h-10 w-auto"
+                />
+                <img
+                  src="https://hutechsolutions.com/wp-content/uploads/2024/08/cmmi-level3-logo.svg"
+                  alt="CMMI Level 3"
+                  className="h-8 w-auto"
+                />
               </div>
             </div>
 
             {/* Navigation Items */}
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-8">
-                <a href="#" className="text-blue-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                <a
+                  href="#"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
                   Home
                 </a>
-                <a href="#" className="text-blue-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                <a
+                  href="#"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
                   Features
                 </a>
-                <a href="#" className="text-blue-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                <a
+                  href="#"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
                   Services
                 </a>
-                <a href="#" className="text-blue-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                <a
+                  href="#"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
                   About
                 </a>
-                <a href="#" className="text-blue-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                <a
+                  href="#"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
                   Contact
                 </a>
               </div>
@@ -1237,71 +1984,69 @@ export default function Index() {
             <div className="flex items-center space-x-4">
               {/* Chat Bot Button */}
               <button
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 transform hover:scale-105 shadow-md"
+                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center gap-2"
                 title="Open Chat Assistant"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                  <path d="M13 8H7"/>
-                  <path d="M17 12H7"/>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  <path d="M13 8H7" />
+                  <path d="M17 12H7" />
                 </svg>
-                <span className="hidden sm:inline text-sm font-medium">Chat</span>
+                <span className="hidden sm:inline text-sm font-medium">
+                  Chat
+                </span>
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               </button>
-
-              {/* User Avatar */}
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center border-2 border-blue-300">
-                <User size={16} className="text-white" />
-              </div>
-
-              {/* Settings */}
-              <button className="text-blue-100 hover:text-white p-1 transition-colors duration-200">
-                <Settings size={20} />
-              </button>
-
-              {/* Mobile Menu Button */}
-              <div className="md:hidden">
-                <button className="text-blue-100 hover:text-white p-2">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="3" y1="6" x2="21" y2="6"/>
-                    <line x1="3" y1="12" x2="21" y2="12"/>
-                    <line x1="3" y1="18" x2="21" y2="18"/>
-                  </svg>
-                </button>
-              </div>
             </div>
           </div>
         </nav>
       </header>
 
       {/* Main Content */}
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] px-6">
+      <div className="flex-1 flex flex-col justify-center px-4 py-3 overflow-hidden max-h-[calc(100vh-140px)]">
         {/* Greeting Section */}
-        <div className="text-center mb-12">
-          <h2 className={`text-4xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} mb-4`}>
-            Hello, this is an{' '}
+        <div className="text-center mb-6">
+          <h2
+            className={`text-2xl font-bold ${darkMode ? "text-white" : "text-gray-800"} mb-2`}
+          >
+            Hello, this is an{" "}
             <span className="animate-colorCycle font-extrabold">
               AI assistant!
             </span>
           </h2>
-          <p className={`text-lg ${darkMode ? 'text-gray-300' : 'text-gray-600'} max-w-2xl`}>
-            I will help you find answers to your questions or support a conversation on any topic. Here are some examples.
+          <p
+            className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-600"} max-w-xl mx-auto`}
+          >
+            I will help you find answers to your questions. Here are some
+            examples.
           </p>
         </div>
 
         {/* Question Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 max-w-4xl w-full mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-2 max-w-3xl w-full mx-auto">
           {predefinedQuestions.map((item, index) => (
             <button
               key={index}
               onClick={() => handleQuestionSubmit(item.question)}
-              className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-600 hover:border-blue-400 hover:from-gray-700 hover:to-gray-600' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:border-blue-300 hover:from-blue-50 hover:to-purple-50'} border rounded-xl p-4 hover:shadow-xl transition-all duration-300 text-left group transform hover:scale-105 hover:-translate-y-1 animate-fadeInUp`}
+              className={`${darkMode ? "bg-gradient-to-br from-gray-800 to-gray-700 border-gray-600 hover:border-blue-400 hover:from-gray-700 hover:to-gray-600" : "bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:border-blue-300 hover:from-blue-50 hover:to-purple-50"} border rounded-lg p-2 hover:shadow-lg transition-all duration-300 text-left group transform hover:scale-105 animate-fadeInUp`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="text-xl mb-2">{item.icon}</div>
-              <h3 className={`font-medium ${darkMode ? 'text-white group-hover:text-blue-400' : 'text-gray-800 group-hover:text-blue-600'} mb-1 text-sm`}>
+              <div className="text-base mb-1">{item.icon}</div>
+              <h3
+                className={`font-medium ${darkMode ? "text-white group-hover:text-blue-400" : "text-gray-800 group-hover:text-blue-600"} mb-1 text-xs leading-tight`}
+              >
                 {item.category}
               </h3>
-              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p
+                className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-600"} leading-tight line-clamp-2`}
+              >
                 {item.question}
               </p>
             </button>
@@ -1309,9 +2054,65 @@ export default function Index() {
         </div>
       </div>
 
-      {/* Input Bar */}
-      <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t px-6 py-4`}>
-        <div className="max-w-4xl mx-auto relative">
+      {/* Modern Voice Animation Overlay - Main Page */}
+      {isRecording && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-gradient-to-br from-orange-500 via-blue-500 to-orange-600 rounded-3xl p-8 shadow-2xl">
+            <div className="flex flex-col items-center gap-6">
+              <div className="relative">
+                {/* Animated mic icon */}
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center animate-voicePulse">
+                  <Mic size={40} className="text-blue-600" />
+                </div>
+                {/* Ripple effect */}
+                <div className="absolute inset-0 rounded-full border-4 border-white/30 animate-ping"></div>
+                <div
+                  className="absolute -inset-2 rounded-full border-2 border-white/20 animate-ping"
+                  style={{ animationDelay: "0.5s" }}
+                ></div>
+                <div
+                  className="absolute -inset-4 rounded-full border border-white/10 animate-ping"
+                  style={{ animationDelay: "1s" }}
+                ></div>
+              </div>
+              <div className="text-center">
+                <h3 className="text-white text-xl font-semibold mb-2">
+                  Listening...
+                </h3>
+                <p className="text-white/80 text-sm">
+                  Speak clearly and I'll understand
+                </p>
+              </div>
+              {/* Sound waves animation */}
+              <div className="flex items-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-1 bg-white/60 rounded-full animate-pulse"
+                    style={{
+                      height: `${Math.random() * 30 + 10}px`,
+                      animationDelay: `${i * 0.1}s`,
+                      animationDuration: "0.8s",
+                    }}
+                  />
+                ))}
+              </div>
+              <button
+                onClick={() => setIsRecording(false)}
+                className="mt-4 px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full transition-all duration-200 backdrop-blur-sm border border-white/20"
+              >
+                Stop Listening
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sticky Input Bar */}
+      <div
+        className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border-t px-4 py-3 flex-shrink-0 fixed bottom-0 left-0 right-0 z-50 backdrop-blur-sm bg-opacity-95`}
+      >
+        <div className="max-w-3xl mx-auto relative">
           {/* File Upload Inputs (Hidden) */}
           <input
             ref={fileInputRef}
@@ -1326,10 +2127,17 @@ export default function Index() {
           {uploadedFiles.length > 0 && (
             <div className="mb-3 flex flex-wrap gap-2">
               {uploadedFiles.map((file, index) => (
-                <div key={index} className="bg-blue-100 px-3 py-1 rounded-full text-sm text-blue-700 flex items-center gap-2">
+                <div
+                  key={index}
+                  className="bg-blue-100 px-3 py-1 rounded-full text-sm text-blue-700 flex items-center gap-2"
+                >
                   <span>{file.name}</span>
                   <button
-                    onClick={() => setUploadedFiles(prev => prev.filter((_, i) => i !== index))}
+                    onClick={() =>
+                      setUploadedFiles((prev) =>
+                        prev.filter((_, i) => i !== index),
+                      )
+                    }
                     className="text-blue-500 hover:text-blue-700"
                   >
                     ×
@@ -1339,34 +2147,18 @@ export default function Index() {
             </div>
           )}
 
-          {/* Dot Menu */}
-          {showDotMenu && (
-            <div className={`dot-menu-container absolute bottom-20 left-6 ${darkMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-200'} rounded-xl shadow-lg p-2 z-10`}>
-              <button
-                onClick={handleImageUpload}
-                className={`w-full text-left px-4 py-2 text-sm ${darkMode ? 'text-blue-400 hover:bg-gray-700' : 'text-blue-600 hover:bg-blue-50'} rounded-lg flex items-center gap-2`}
-              >
-                <Image size={16} />
-                Upload photo
-              </button>
-              <button
-                onClick={handleFileUpload}
-                className={`w-full text-left px-4 py-2 text-sm ${darkMode ? 'text-purple-400 hover:bg-gray-700' : 'text-purple-600 hover:bg-purple-50'} rounded-lg flex items-center gap-2`}
-              >
-                <FileText size={16} />
-                Upload file
-              </button>
-            </div>
-          )}
-
-          <div className={`flex items-center gap-3 ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-full p-3 transition-all duration-300 ${isLoading ? 'bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-2 border-blue-300 shadow-lg scale-105' : `${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'} hover:shadow-md`}`}>
+          <div
+            className={`flex items-center gap-3 ${darkMode ? "bg-gray-700" : "bg-gray-50"} rounded-full p-3 transition-all duration-300 border ${darkMode ? "border-gray-600" : "border-gray-200"} shadow-sm ${isLoading ? "bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-blue-300 shadow-lg scale-105" : `${darkMode ? "hover:bg-gray-600 hover:border-gray-500" : "hover:bg-white hover:border-gray-300"} hover:shadow-md`}`}
+          >
             {/* Left side - Voice only */}
             <div className="flex items-center gap-2">
               {/* Voice button */}
               <button
                 onClick={handleVoiceInput}
                 className={`p-2 transition-colors duration-200 ${
-                  isRecording ? 'text-red-500 animate-pulse' : `${darkMode ? 'text-gray-400 hover:text-blue-400' : 'text-gray-500 hover:text-blue-600'}`
+                  isRecording
+                    ? "text-blue-600 animate-voicePulse"
+                    : `${darkMode ? "text-gray-400 hover:text-blue-400" : "text-gray-500 hover:text-blue-600"}`
                 }`}
                 title="Voice input"
               >
@@ -1379,10 +2171,10 @@ export default function Index() {
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleInputSubmit()}
+              onKeyPress={(e) => e.key === "Enter" && handleInputSubmit()}
               placeholder={isRecording ? "Listening..." : "How can I help?"}
               disabled={isLoading || isRecording}
-              className={`flex-1 bg-transparent outline-none ${darkMode ? 'text-white placeholder-gray-400' : 'text-gray-800 placeholder-gray-500'} disabled:opacity-50`}
+              className={`flex-1 bg-transparent outline-none ${darkMode ? "text-white placeholder-gray-400" : "text-gray-800 placeholder-gray-500"} disabled:opacity-50`}
             />
 
             {/* Right side controls */}
@@ -1390,17 +2182,31 @@ export default function Index() {
               {/* Dark mode toggle */}
               <button
                 onClick={() => setDarkMode(!darkMode)}
-                className={`p-2 ${darkMode ? 'text-gray-400 hover:text-blue-400' : 'text-gray-500 hover:text-blue-600'} transition-colors duration-200`}
+                className={`p-2 ${darkMode ? "text-gray-400 hover:text-blue-400" : "text-gray-500 hover:text-blue-600"} transition-colors duration-200`}
                 title="Toggle dark mode"
               >
                 {darkMode ? (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="5"/>
-                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <circle cx="12" cy="12" r="5" />
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
                   </svg>
                 ) : (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                   </svg>
                 )}
               </button>
@@ -1408,13 +2214,20 @@ export default function Index() {
               {/* Dot menu */}
               <button
                 onClick={() => setShowDotMenu(!showDotMenu)}
-                className={`p-2 ${darkMode ? 'text-gray-400 hover:text-blue-400' : 'text-gray-500 hover:text-blue-600'} transition-colors duration-200`}
+                className={`p-2 ${darkMode ? "text-gray-400 hover:text-blue-400" : "text-gray-500 hover:text-blue-600"} transition-colors duration-200`}
                 title="More options"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="1"/>
-                  <circle cx="12" cy="5" r="1"/>
-                  <circle cx="12" cy="19" r="1"/>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="12" cy="5" r="1" />
+                  <circle cx="12" cy="19" r="1" />
                 </svg>
               </button>
 
@@ -1424,8 +2237,8 @@ export default function Index() {
                 disabled={isLoading || !inputValue.trim() || isRecording}
                 className={`p-2 rounded-full transition-all duration-300 transform ${
                   isLoading || isRecording
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700 hover:scale-105 active:scale-95'
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700 hover:scale-105 active:scale-95"
                 } text-white disabled:opacity-50 disabled:hover:scale-100`}
               >
                 {isLoading ? (
@@ -1441,9 +2254,13 @@ export default function Index() {
 
       {/* Notification */}
       {notification && (
-        <div className={`fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 ${
-          notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-        }`}>
+        <div
+          className={`fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 ${
+            notification.type === "success"
+              ? "bg-green-500 text-white"
+              : "bg-red-500 text-white"
+          }`}
+        >
           {notification.message}
         </div>
       )}
